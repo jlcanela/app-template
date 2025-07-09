@@ -57,7 +57,8 @@ Nix provides several benefits for development:
 
    ```bash
    # From the project root
-   nix shell -c $SHELL
+   not working: nix shell -c $SHELL
+   nix develop
    ```
 
    The `-c $SHELL` option starts your current shell inside the Nix environment, which preserves your shell configuration, aliases, and history. This gives you a more comfortable development experience compared to the default Nix shell.

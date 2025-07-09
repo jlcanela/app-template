@@ -23,6 +23,7 @@
             postgresql
             git
             deno
+            tree
           ];
           
           shellHook = ''
