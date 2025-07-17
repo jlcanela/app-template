@@ -20,3 +20,9 @@ scratchpad/*
 stats.html
 
 .aider*
+
+# Aspire
+bin
+obj
+
+CosmosAnalytics.Web

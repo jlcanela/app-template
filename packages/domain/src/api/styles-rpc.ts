@@ -64,4 +64,4 @@ export class StylesGroup extends HttpApiGroup.make("styles")
       .addSuccess(Schema.Void)
       .addError(StyleNotFoundError),
   )
-  .prefix("/styles") {}
+  .prefix("/api/styles") {}

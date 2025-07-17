@@ -1,18 +1,17 @@
 import { HttpApiBuilder } from "@effect/platform";
 import { DomainApi } from "@org/domain/domain-api";
 import { Effect, Layer } from "effect";
-import { StylesRepo } from "./internal/styles-repo.js";
+import { StylesRepo2 } from "./internal/styles-repo.js";
 
 export const StylesRpcLive = HttpApiBuilder.group(DomainApi, "styles", (handlers) =>
   Effect.gen(function* () {
-    const repo = yield* StylesRepo;
+    const repo = yield* StylesRepo2;
 
     return handlers
-      .handle("list", () => repo.findAll())
-      .handle("upsert", (req) =>
+      .handle("list", () => repo.findAll)
+      .handle("upsert", ({ payload }) =>
         Effect.gen(function* () {
-          yield* Effect.log(req);
-          const payload = req.payload;
+          yield* Effect.log(payload);
           if (payload.id !== undefined) {
             return yield* repo.update({
               id: payload.id,
@@ -28,4 +27,4 @@ export const StylesRpcLive = HttpApiBuilder.group(DomainApi, "styles", (handlers
       )
       .handle("delete", ({ payload }) => repo.del(payload.id));
   }),
-).pipe(Layer.provide(StylesRepo.Default));
+).pipe(Layer.provide(StylesRepo2.Default));

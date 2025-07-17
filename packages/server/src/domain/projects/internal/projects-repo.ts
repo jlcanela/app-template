@@ -1,11 +1,11 @@
-import { Style, StyleId, StyleNotFoundError } from "@org/domain/api/styles-rpc";
+import { Project, ProjectId, ProjectNotFoundError } from "@org/domain/api/projects-rpc";
 import { Effect, Schema } from "effect";
 
-const CreateStyleInput = Style.pipe(Schema.pick("name", "rule"));
-type CreateStyleInput = typeof CreateStyleInput.Type;
+const CreateProjectInput = Project.pipe(Schema.omit("id"));
+type CreateProjectInput = typeof CreateProjectInput.Type;
 
-const UpdateStyleInput = Style.pipe(Schema.pick("id", "name", "rule"));
-type UpdateStyleInput = typeof UpdateStyleInput.Type;
+const UpdateProjectInput = Project; //Style.pipe(Schema.pick("id", "name", "rule"));
+type UpdateProjectInput = typeof UpdateProjectInput.Type;
 
 // export class StylesRepo extends Effect.Service<StylesRepo>()("StylesRepo", {
 //   dependencies: [PgLive],
@@ -84,7 +84,7 @@ type UpdateStyleInput = typeof UpdateStyleInput.Type;
 //   }),
 // }) {}
 
-export class StylesRepo2 extends Effect.Service<StylesRepo2>()("StylesRepo2", {
+export class ProjectsRepo extends Effect.Service<ProjectsRepo>()("ProjectsRepo", {
   effect: Effect.gen(function* () {
     // const sql = yield* SqlClient.SqlClient;
 
@@ -137,21 +137,16 @@ export class StylesRepo2 extends Effect.Service<StylesRepo2>()("StylesRepo2", {
     // });
 
     return {
-      findAll: Effect.succeed(new Array<Style>()),
-      del: (id: StyleId) => Effect.succeed(true).pipe(Effect.asVoid),
-      update: (request: UpdateStyleInput) =>
-        Effect.fail(new StyleNotFoundError({ id: request.id })) as Effect.Effect<
-          Style,
-          StyleNotFoundError,
+      findAll: () => Effect.succeed(new Array<Project>()),
+      del: (id: ProjectId) => Effect.succeed(true).pipe(Effect.asVoid),
+      update: (request: UpdateProjectInput) =>
+        Effect.fail(new ProjectNotFoundError({ id: request.id })) as Effect.Effect<
+          Project,
+          ProjectNotFoundError,
           never
         >,
-      create: (request: CreateStyleInput) =>
-        Effect.succeed({
-          ...request,
-          id: StyleId.make("oops"),
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        }) as unknown as Effect.Effect<Style, StyleNotFoundError, never>,
+      create: (request: CreateProjectInput) =>
+        Effect.succeed({ ...request, id: ProjectId.make("oops") }),
     } as const;
   }),
 }) {}

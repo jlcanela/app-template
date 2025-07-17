@@ -1,44 +1,45 @@
-import { Style, StyleId, StyleNotFoundError } from "@org/domain/api/styles-rpc";
+import { Project, ProjectId, ProjectNotFoundError } from "@org/domain/api/project-rpc";
 import { Effect, Schema } from "effect";
+// import { PgLive } from "../../../../../database/src/database.js";
 
-const CreateStyleInput = Style.pipe(Schema.pick("name", "rule"));
-type CreateStyleInput = typeof CreateStyleInput.Type;
+const CreateProjectInput = Project.pipe(Schema.pick("name", "rule"));
+type CreateProjectInput = typeof CreateProjectInput.Type;
 
-const UpdateStyleInput = Style.pipe(Schema.pick("id", "name", "rule"));
-type UpdateStyleInput = typeof UpdateStyleInput.Type;
+const UpdateProjectInput = Project.pipe(Schema.pick("id", "name", "rule"));
+type UpdateProjectInput = typeof UpdateProjectInput.Type;
 
-// export class StylesRepo extends Effect.Service<StylesRepo>()("StylesRepo", {
+// export class ProjectsRepo extends Effect.Service<ProjectsRepo>()("ProjectsRepo", {
 //   dependencies: [PgLive],
 //   effect: Effect.gen(function* () {
 //     const sql = yield* SqlClient.SqlClient;
 
 //     const findAll = SqlSchema.findAll({
-//       Result: Style,
+//       Result: Project,
 //       Request: Schema.Void,
 //       execute: () => sql`
 //         SELECT
 //           *
 //         FROM
-//           styles
+//           Projects
 //       `,
 //     });
 
 //     const create = SqlSchema.single({
-//       Result: Style,
-//       Request: CreateStyleInput,
+//       Result: Project,
+//       Request: CreateProjectInput,
 //       execute: (request) => sql`
 //         INSERT INTO
-//           styles ${sql.insert(request)}
+//           Projects ${sql.insert(request)}
 //         RETURNING
 //           *
 //       `,
 //     });
 
 //     const update = SqlSchema.single({
-//       Result: Style,
-//       Request: UpdateStyleInput,
+//       Result: Project,
+//       Request: UpdateProjectInput,
 //       execute: (request) => sql`
-//         UPDATE styles
+//         UPDATE Projects
 //         SET
 //           ${sql.update(request)}
 //         WHERE
@@ -49,10 +50,10 @@ type UpdateStyleInput = typeof UpdateStyleInput.Type;
 //     });
 
 //     const del = SqlSchema.single({
-//       Request: StyleId,
+//       Request: ProjectId,
 //       Result: Schema.Unknown,
 //       execute: (id) => sql`
-//         DELETE FROM styles
+//         DELETE FROM Projects
 //         WHERE
 //           id = ${id}
 //         RETURNING
@@ -62,19 +63,19 @@ type UpdateStyleInput = typeof UpdateStyleInput.Type;
 
 //     return {
 //       findAll: flow(findAll, Effect.orDie),
-//       del: (id: StyleId) =>
+//       del: (id: ProjectId) =>
 //         del(id).pipe(
 //           Effect.asVoid,
 //           Effect.catchTags({
-//             NoSuchElementException: () => new StyleNotFoundError({ id }),
+//             NoSuchElementException: () => new ProjectNotFoundError({ id }),
 //             ParseError: Effect.die,
 //             SqlError: Effect.die,
 //           }),
 //         ),
-//       update: (request: UpdateStyleInput) =>
+//       update: (request: UpdateProjectInput) =>
 //         update(request).pipe(
 //           Effect.catchTags({
-//             NoSuchElementException: () => new StyleNotFoundError({ id: request.id }),
+//             NoSuchElementException: () => new ProjectNotFoundError({ id: request.id }),
 //             ParseError: Effect.die,
 //             SqlError: Effect.die,
 //           }),
@@ -84,37 +85,37 @@ type UpdateStyleInput = typeof UpdateStyleInput.Type;
 //   }),
 // }) {}
 
-export class StylesRepo2 extends Effect.Service<StylesRepo2>()("StylesRepo2", {
+export class ProjectsRepo extends Effect.Service<ProjectsRepo>()("ProjectsRepo", {
   effect: Effect.gen(function* () {
     // const sql = yield* SqlClient.SqlClient;
 
     // const findAll = SqlSchema.findAll({
-    //   Result: Style,
+    //   Result: Project,
     //   Request: Schema.Void,
     //   execute: () => sql`
     //     SELECT
     //       *
     //     FROM
-    //       styles
+    //       Projects
     //   `,
     // });
 
     // const create = SqlSchema.single({
-    //   Result: Style,
-    //   Request: CreateStyleInput,
+    //   Result: Project,
+    //   Request: CreateProjectInput,
     //   execute: (request) => sql`
     //     INSERT INTO
-    //       styles ${sql.insert(request)}
+    //       Projects ${sql.insert(request)}
     //     RETURNING
     //       *
     //   `,
     // });
 
     // const update = SqlSchema.single({
-    //   Result: Style,
-    //   Request: UpdateStyleInput,
+    //   Result: Project,
+    //   Request: UpdateProjectInput,
     //   execute: (request) => sql`
-    //     UPDATE styles
+    //     UPDATE Projects
     //     SET
     //       ${sql.update(request)}
     //     WHERE
@@ -125,10 +126,10 @@ export class StylesRepo2 extends Effect.Service<StylesRepo2>()("StylesRepo2", {
     // });
 
     // const del = SqlSchema.single({
-    //   Request: StyleId,
+    //   Request: ProjectId,
     //   Result: Schema.Unknown,
     //   execute: (id) => sql`
-    //     DELETE FROM styles
+    //     DELETE FROM Projects
     //     WHERE
     //       id = ${id}
     //     RETURNING
@@ -137,21 +138,12 @@ export class StylesRepo2 extends Effect.Service<StylesRepo2>()("StylesRepo2", {
     // });
 
     return {
-      findAll: Effect.succeed(new Array<Style>()),
-      del: (id: StyleId) => Effect.succeed(true).pipe(Effect.asVoid),
-      update: (request: UpdateStyleInput) =>
-        Effect.fail(new StyleNotFoundError({ id: request.id })) as Effect.Effect<
-          Style,
-          StyleNotFoundError,
-          never
-        >,
-      create: (request: CreateStyleInput) =>
-        Effect.succeed({
-          ...request,
-          id: StyleId.make("oops"),
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        }) as unknown as Effect.Effect<Style, StyleNotFoundError, never>,
+      findAll: Effect.succeed(new Array<Project>()),
+      del: Effect.void,
+      update: (request: UpdateProjectInput) =>
+        Effect.fail(new ProjectNotFoundError({ id: request.id })),
+      create: (request: CreateProjectInput) =>
+        Effect.succeed({ ...request, id: ProjectId.make("oops") }),
     } as const;
   }),
 }) {}
