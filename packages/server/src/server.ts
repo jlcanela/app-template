@@ -7,9 +7,14 @@ import { BatchSpanProcessor } from "@opentelemetry/sdk-trace-base";
 import { DomainApi } from "@org/domain/domain-api";
 import { Layer } from "effect";
 import { createServer } from "http";
+import { AdminRpcLive } from "./domain/admin/admin-rpc-live.js";
+import { ProjectsRepo } from "./domain/projects/internal/projects-repo.js";
+import { ProjectsService } from "./domain/projects/internal/projects-service.js";
 import { ProjectsRpcLive } from "./domain/projects/projects-rpc-live.js";
+import { SearchRepo } from "./domain/search/internal/search-repo.js";
 import { SearchRpcLive } from "./domain/search/search-rpc-live.js";
 import { StylesRpcLive } from "./domain/styles/styles-rpc-live.js";
+import { Cosmos } from "./services/CosmosDb.js";
 
 const ApiLive = HttpLayerRouter.addHttpApi(DomainApi, {
   openapiPath: "/v1/swagger.json",
@@ -50,9 +55,14 @@ const SwaggerRouter = HttpLayerRouter.use((router) =>
 );
 
 const AllRoutes = Layer.mergeAll(ApiLive, HealthRouter, SwaggerRouter).pipe(
+  Layer.provide(AdminRpcLive),
   Layer.provide(StylesRpcLive),
   Layer.provide(ProjectsRpcLive),
+  Layer.provide(ProjectsRepo.Default),
+  Layer.provide(ProjectsService.Default),
   Layer.provide(SearchRpcLive),
+  Layer.provide(SearchRepo.Default),
+  Layer.provide(Cosmos.Default),
 );
 
 const portEnv = process.env.PORT;

@@ -1,14 +1,7 @@
 import { HttpApiEndpoint, HttpApiGroup, HttpApiSchema } from "@effect/platform";
 import { faker } from "@faker-js/faker";
-import type { FastCheck } from "effect";
-import { Schema } from "effect";
-import type { LazyArbitrary } from "effect/Arbitrary";
-
-type F<A> = (f: typeof faker) => A;
-
-function g<A>(f: F<A>): () => LazyArbitrary<A> {
-  return () => (fc: typeof FastCheck) => fc.constant(null).map(() => f(faker));
-}
+import { FastCheck, Schema } from "effect";
+import { LazyArbitrary } from "effect/Arbitrary";
 
 export const ProjectId = Schema.UUID.pipe(Schema.brand("ProjectId"));
 export type ProjectId = typeof ProjectId.Type;
@@ -20,14 +13,49 @@ export const ProjectStatus = Schema.Union(
   Schema.Literal("Archived"),
 );
 
+type F<A> = (f: typeof faker) => A;
+
+function g<A>(f: F<A>): () => LazyArbitrary<A> {
+  return () => (fc: typeof FastCheck) => fc.constant(null).map(() => f(faker));
+}
+
 export class Project extends Schema.Class<Project>("Project")({
-  id: ProjectId,
-  name: Schema.String,
-  description: Schema.String,
-  goal: Schema.String,
-  stakeholders: Schema.String,
-  status: ProjectStatus,
+  id: ProjectId.annotations({
+    title: "Project ID",
+    arbitrary: g((faker) => ProjectId.make(faker.string.uuid())),
+  }),
+  name: Schema.String.annotations({
+    title: "Project Name",
+    description: "The title or name of the project",
+    arbitrary: g((faker) => faker.lorem.words(2)),
+  }),
+  description: Schema.String.annotations({
+    title: "Project Description",
+    description: "A detailed description of what the project is about",
+    arbitrary: g((faker) => faker.lorem.sentences(2)),
+  }),
+  goal: Schema.String.annotations({
+    title: "Project Goal",
+    description: "What the project aims to achieve",
+    arbitrary: g((faker) => faker.lorem.sentence()),
+  }),
+  stakeholders: Schema.String.annotations({
+    title: "Project Stakeholders",
+    description: "Key individuals or organizations involved or impacted by the project",
+    arbitrary: g((faker) => `${faker.person.fullName()}, ${faker.person.fullName()}`),
+  }),
+  status: ProjectStatus, // you can add .annotations({ ... }) here if needed
 }) {}
+
+// export class Project extends Schema.Class<Project>("Project")({
+//   id: ProjectId,
+//   name: Schema.String,
+//   description: Schema.String,
+//   goal: Schema.String,
+//   stakeholders: Schema.String,
+//   status: ProjectStatus,
+// }) {}
+export type ProjectType = Schema.Schema.Type<typeof Project>;
 
 export class UpsertProjectPayload extends Schema.Class<UpsertProjectPayload>(
   "UpsertProjectPayload",

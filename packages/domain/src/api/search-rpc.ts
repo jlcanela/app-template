@@ -5,8 +5,11 @@ import { Schema } from "effect";
 
 import { Project } from "./projects-rpc.js";
 
+const EntityTypes = Schema.Union(Schema.Literal("project"));
+export type EntityTypes = Schema.Schema.Type<typeof EntityTypes>;
+
 export const SearchParams = Schema.Struct({
-  type: Schema.Literal("project"),
+  type: EntityTypes,
   columnFilterFns: Schema.Record({ key: Schema.String, value: Schema.String }), // Record<string, string>
   columnFilters: Schema.Array(
     Schema.Struct({ id: Schema.String, value: Schema.Unknown }), // ColumnFilter[]
@@ -16,7 +19,9 @@ export const SearchParams = Schema.Struct({
     Schema.Struct({ id: Schema.String, desc: Schema.Boolean }), // ColumnSort[]
   ),
   pagination: Schema.Struct({ pageIndex: Schema.Number, pageSize: Schema.Number }),
+  continuationToken: Schema.String.pipe(Schema.optional),
 });
+export type SearchParamsType = Schema.Schema.Type<typeof SearchParams>;
 
 // === ENTITY SEARCH RESPONSE (generic) ===
 export const ErrorResponse = Schema.Struct({

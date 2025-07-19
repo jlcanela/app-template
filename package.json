@@ -110,13 +110,17 @@
       "@opentelemetry/sdk-trace-base": "2.0.0",
       "@opentelemetry/sdk-trace-node": "2.0.0",
       "@opentelemetry/semantic-conventions": "1.30.0",
-      "@opentelemetry/exporter-trace-otlp-http": "0.200.0"
+      "@opentelemetry/exporter-trace-otlp-http": "0.200.0",
+      "react": "19.1.0",
+      "react-dom": "19.1.0"
     },
     "patchedDependencies": {
       "babel-plugin-annotate-pure-calls@0.4.0": "patches/babel-plugin-annotate-pure-calls@0.4.0.patch"
     }
   },
   "dependencies": {
-    "tailwindcss": "4.0.4"
+    "tailwindcss": "4.0.4",
+    "react": "19.1.0",
+    "react-dom": "19.1.0"
   }
 }

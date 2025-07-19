@@ -9,17 +9,35 @@ import {
   Text,
   Title,
 } from "@mantine/core";
+import { DomainApi } from "@org/domain/domain-api";
 import { useState } from "react";
 
-import { CheckIcon, XMarkIcon } from "@heroicons/react/24/outline";
-import createFetchClient from "openapi-fetch";
-import createClient from "openapi-react-query";
-import type { paths } from "../schema-api";
+import { FetchHttpClient, HttpApiClient } from "@effect/platform";
+import { useMutation } from "@tanstack/react-query";
+import { Effect } from "effect";
 
-const fetchClient = createFetchClient<paths>({
-  baseUrl: "https://localhost:7415",
-});
-const $api = createClient(fetchClient);
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import ErrorIcon from "@mui/icons-material/Error";
+
+const genSample = (size: number) =>
+  Effect.gen(function* () {
+    const client = yield* HttpApiClient.make(DomainApi, {
+      baseUrl: window.location.origin,
+    });
+    return yield* client.admin["generate-sample"]({ payload: { size } });
+  }).pipe(Effect.provide(FetchHttpClient.layer));
+
+const useGenerateSample = () =>
+  useMutation<number, Error, number>({
+    mutationFn: async (size: number) => {
+      try {
+        return await Effect.runPromise(genSample(size));
+      } catch (error) {
+        // Normalize error to a standard error
+        throw new Error(error instanceof Error ? error.message : "Unknown error");
+      }
+    },
+  });
 
 export function GenerateFakeProjects() {
   const [size, setSize] = useState(10);
@@ -30,28 +48,25 @@ export function GenerateFakeProjects() {
   } | null>(null);
 
   // React Query v4: isLoading; v5: isPending
-  const { mutate, status } = $api.useMutation("post", "/api/generate-sample");
+  const { mutate, status } = useGenerateSample();
 
   const handleGenerate = () => {
-    mutate(
-      { params: { query: { size } } },
-      {
-        onSuccess: (data: number) => {
-          setNotification({
-            message: `Successfully generated ${data} fake project(s)!`,
-            color: "green",
-            icon: <CheckIcon />,
-          });
-        },
-        onError: (error: any) => {
-          setNotification({
-            message: error?.message || "An error occurred while generating fake projects.",
-            color: "red",
-            icon: <XMarkIcon />,
-          });
-        },
+    mutate(size, {
+      onSuccess: (data: number) => {
+        setNotification({
+          message: `Successfully generated ${data} fake project(s)!`,
+          color: "green",
+          icon: <CheckCircleIcon fontSize="large" />,
+        });
       },
-    );
+      onError: (error: any) => {
+        setNotification({
+          message: error?.message || "An error occurred while generating fake projects.",
+          color: "red",
+          icon: <ErrorIcon fontSize="large" color="error" />,
+        });
+      },
+    });
   };
 
   return (

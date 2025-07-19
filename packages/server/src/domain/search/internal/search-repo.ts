@@ -1,24 +1,19 @@
-import { Project, ProjectId } from "@org/domain/api/projects-rpc";
-import { EntitySearchResponseProject } from "@org/domain/api/search-rpc";
-import { randomUUID } from "crypto";
+import { ProjectsRepo } from "@/domain/projects/internal/projects-repo.js";
+import { Cosmos } from "@/services/CosmosDb.js";
+import { Project } from "@org/domain/api/projects-rpc";
+import { SearchParams } from "@org/domain/api/search-rpc";
 import { Effect } from "effect";
 
 export class SearchRepo extends Effect.Service<SearchRepo>()("SearchRepo", {
+  dependencies: [ProjectsRepo.Default],
   effect: Effect.gen(function* () {
+    const cosmos = yield* Cosmos;
+    const search = (searchParams: typeof SearchParams.Type) =>
+      Effect.gen(function* () {
+        return yield* cosmos.search<Project>(searchParams);
+      });
     return {
-      search: () =>
-        Effect.succeed({
-          items: [
-            Project.make({
-              id: ProjectId.make(randomUUID()),
-              name: "name",
-              description: "description",
-              goal: "goal",
-              stakeholders: "stakeholders",
-              status: "Draft",
-            }),
-          ],
-        } as EntitySearchResponseProject),
+      search,
     } as const;
   }),
 }) {}

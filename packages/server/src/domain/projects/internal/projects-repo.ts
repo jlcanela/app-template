@@ -1,152 +1,42 @@
+import { Cosmos } from "@/services/CosmosDb.js";
 import { Project, ProjectId, ProjectNotFoundError } from "@org/domain/api/projects-rpc";
+import { SearchParams } from "@org/domain/api/search-rpc";
 import { Effect, Schema } from "effect";
 
 const CreateProjectInput = Project.pipe(Schema.omit("id"));
 type CreateProjectInput = typeof CreateProjectInput.Type;
 
-const UpdateProjectInput = Project; //Style.pipe(Schema.pick("id", "name", "rule"));
+const UpdateProjectInput = Project; //.pipe(Schema.pick("id", "name", "rule"));
 type UpdateProjectInput = typeof UpdateProjectInput.Type;
 
-// export class StylesRepo extends Effect.Service<StylesRepo>()("StylesRepo", {
-//   dependencies: [PgLive],
-//   effect: Effect.gen(function* () {
-//     const sql = yield* SqlClient.SqlClient;
-
-//     const findAll = SqlSchema.findAll({
-//       Result: Style,
-//       Request: Schema.Void,
-//       execute: () => sql`
-//         SELECT
-//           *
-//         FROM
-//           styles
-//       `,
-//     });
-
-//     const create = SqlSchema.single({
-//       Result: Style,
-//       Request: CreateStyleInput,
-//       execute: (request) => sql`
-//         INSERT INTO
-//           styles ${sql.insert(request)}
-//         RETURNING
-//           *
-//       `,
-//     });
-
-//     const update = SqlSchema.single({
-//       Result: Style,
-//       Request: UpdateStyleInput,
-//       execute: (request) => sql`
-//         UPDATE styles
-//         SET
-//           ${sql.update(request)}
-//         WHERE
-//           id = ${request.id}
-//         RETURNING
-//           *
-//       `,
-//     });
-
-//     const del = SqlSchema.single({
-//       Request: StyleId,
-//       Result: Schema.Unknown,
-//       execute: (id) => sql`
-//         DELETE FROM styles
-//         WHERE
-//           id = ${id}
-//         RETURNING
-//           id
-//       `,
-//     });
-
-//     return {
-//       findAll: flow(findAll, Effect.orDie),
-//       del: (id: StyleId) =>
-//         del(id).pipe(
-//           Effect.asVoid,
-//           Effect.catchTags({
-//             NoSuchElementException: () => new StyleNotFoundError({ id }),
-//             ParseError: Effect.die,
-//             SqlError: Effect.die,
-//           }),
-//         ),
-//       update: (request: UpdateStyleInput) =>
-//         update(request).pipe(
-//           Effect.catchTags({
-//             NoSuchElementException: () => new StyleNotFoundError({ id: request.id }),
-//             ParseError: Effect.die,
-//             SqlError: Effect.die,
-//           }),
-//         ),
-//       create: flow(create, Effect.orDie),
-//     } as const;
-//   }),
-// }) {}
-
 export class ProjectsRepo extends Effect.Service<ProjectsRepo>()("ProjectsRepo", {
+  dependencies: [Cosmos.Default],
   effect: Effect.gen(function* () {
-    // const sql = yield* SqlClient.SqlClient;
+    const cosmos = yield* Cosmos;
 
-    // const findAll = SqlSchema.findAll({
-    //   Result: Style,
-    //   Request: Schema.Void,
-    //   execute: () => sql`
-    //     SELECT
-    //       *
-    //     FROM
-    //       styles
-    //   `,
-    // });
-
-    // const create = SqlSchema.single({
-    //   Result: Style,
-    //   Request: CreateStyleInput,
-    //   execute: (request) => sql`
-    //     INSERT INTO
-    //       styles ${sql.insert(request)}
-    //     RETURNING
-    //       *
-    //   `,
-    // });
-
-    // const update = SqlSchema.single({
-    //   Result: Style,
-    //   Request: UpdateStyleInput,
-    //   execute: (request) => sql`
-    //     UPDATE styles
-    //     SET
-    //       ${sql.update(request)}
-    //     WHERE
-    //       id = ${request.id}
-    //     RETURNING
-    //       *
-    //   `,
-    // });
-
-    // const del = SqlSchema.single({
-    //   Request: StyleId,
-    //   Result: Schema.Unknown,
-    //   execute: (id) => sql`
-    //     DELETE FROM styles
-    //     WHERE
-    //       id = ${id}
-    //     RETURNING
-    //       id
-    //   `,
-    // });
+    const search = (searchParams: typeof SearchParams.Type) =>
+      Effect.gen(function* () {
+        yield* Effect.log(`Searching projects with params: ${JSON.stringify(searchParams)}`);
+        const projects = (yield* cosmos.search(searchParams)).items as Project[]; //<Project>("projects");
+        yield* Effect.log(`Found ${projects.length} projects`);
+        return projects;
+      });
 
     return {
-      findAll: () => Effect.succeed(new Array<Project>()),
-      del: (id: ProjectId) => Effect.succeed(true).pipe(Effect.asVoid),
+      search,
+      findAll: Effect.gen(function* () {
+        const projects = (yield* cosmos.query()) as Project[]; //<Project>("projects");
+        yield* Effect.log(`Found ${projects.length} projects`);
+        //Effect.succeed(new Array<Project>()),
+        return projects;
+      }),
+      del: Effect.void,
       update: (request: UpdateProjectInput) =>
-        Effect.fail(new ProjectNotFoundError({ id: request.id })) as Effect.Effect<
-          Project,
-          ProjectNotFoundError,
-          never
-        >,
+        Effect.fail(new ProjectNotFoundError({ id: request.id })),
       create: (request: CreateProjectInput) =>
-        Effect.succeed({ ...request, id: ProjectId.make("oops") }),
+        Effect.gen(function* () {
+          return Effect.succeed({ ...request, id: ProjectId.make("oops") });
+        }),
     } as const;
   }),
 }) {}

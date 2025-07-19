@@ -1,5 +1,4 @@
-import { ActionIcon, Tooltip } from "@mantine/core";
-import { IconRefresh } from "@tabler/icons-react";
+import { EntityTypes } from "@org/domain/api/search-rpc";
 import {
   MantineReactTable,
   useMantineReactTable,
@@ -15,7 +14,7 @@ import { useSearch } from "../hooks/useSearch"; // adjust path!
 
 type GenericTableProps<T extends MRT_RowData> = {
   columns: MRT_ColumnDef<T>[];
-  entityType: string;
+  entityType: EntityTypes;
 };
 
 export function GenericTable<T extends MRT_RowData>({ columns, entityType }: GenericTableProps<T>) {
@@ -30,7 +29,7 @@ export function GenericTable<T extends MRT_RowData>({ columns, entityType }: Gen
     pageSize: 10,
   });
 
-  const { data, isError, isFetching, isLoading, refetch } = useSearch<T>(entityType, {
+  const { data, isError, isFetching, isLoading } = useSearch<T>(entityType, {
     columnFilterFns,
     columnFilters,
     globalFilter,
@@ -39,7 +38,7 @@ export function GenericTable<T extends MRT_RowData>({ columns, entityType }: Gen
   });
 
   const items = data?.items ?? [];
-  const totalRowCount = data?.meta?.totalRowCount ?? 0;
+  const totalRowCount = data?.totalCount ?? 0;
 
   const table = useMantineReactTable<T>({
     columns,
@@ -51,25 +50,25 @@ export function GenericTable<T extends MRT_RowData>({ columns, entityType }: Gen
     manualPagination: true,
     manualSorting: true,
     // Fix types here
-    mantineToolbarAlertBannerProps: isError
-      ? {
-          color: "red",
-          children: "Error loading data",
-        }
-      : undefined,
+    // mantineToolbarAlertBannerProps: isError
+    //   ? {
+    //       color: "red",
+    //       children: "Error loading data",
+    //     }
+    //   : undefined,
 
     onColumnFilterFnsChange: setColumnFilterFns,
     onColumnFiltersChange: setColumnFilters,
     onGlobalFilterChange: setGlobalFilter,
     onPaginationChange: setPagination,
     onSortingChange: setSorting,
-    renderTopToolbarCustomActions: () => (
-      <Tooltip label="Refresh Data">
-        <ActionIcon onClick={() => refetch()} variant="light" size="lg">
-          <IconRefresh />
-        </ActionIcon>
-      </Tooltip>
-    ),
+    // renderTopToolbarCustomActions: () => (
+    //   <Tooltip label="Refresh Data">
+    //     <ActionIcon onClick={() => refetch()} variant="light" size="lg">
+    //       <IconRefresh />
+    //     </ActionIcon>
+    //   </Tooltip>
+    // ),
     rowCount: totalRowCount,
     state: {
       columnFilterFns,
