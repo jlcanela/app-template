@@ -119,13 +119,30 @@ export class Cosmos extends Effect.Service<Cosmos>()("app/CosmosDb", {
         return Effect.gen(function* () {
           const filters = searchParams.columnFilters
             .filter((f) => typeof f.value === "string" && f.value.length > 0)
-            .map((f, idx) => ({
-              clause: `Contains(c.${f.id}, @param${idx})`,
-              param: {
-                name: `@param${idx}`,
-                value: f.value as JSONValue, // ✅ explicitly cast to JSONValue
-              },
-            }));
+            .map((f, idx) => {
+              const filterFn = searchParams.columnFilterFns[f.id] || "contains";
+
+              let clause = "";
+              let paramValue = f.value as JSONValue;
+
+              if (filterFn === "contains") {
+                clause = `CONTAINS(c.${f.id}, @param${idx})`;
+              } else if (filterFn === "startsWith") {
+                clause = `STARTSWITH(c.${f.id}, @param${idx})`;
+              } else if (filterFn === "endsWith") {
+                clause = `ENDSWITH(c.${f.id}, @param${idx})`;
+              } else {
+                throw new Error(`Unknown filterFn: ${filterFn}`);
+              }
+
+              return {
+                clause,
+                param: {
+                  name: `@param${idx}`,
+                  value: paramValue,
+                },
+              };
+            });
 
           const whereClause =
             filters.length > 0 ? "WHERE " + filters.map((f) => f.clause).join(" AND ") : "";
