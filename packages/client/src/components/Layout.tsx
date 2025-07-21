@@ -63,6 +63,18 @@ export function Layout({ children }: React.PropsWithChildren) {
               to="/admin"
               active={isPath("/admin")}
             />
+            <NavLink
+              label="Effect Rx"
+              component={Link}
+              to="/effect-rx"
+              active={isPath("/effect-rx")}
+            />
+            <NavLink
+              label="Configuration"
+              component={Link}
+              to="/config"
+              active={isPath("/config")}
+            />
             <NavLink label="Project Management" component={Link} to="/" active={isPath("/")} />
           </Stack>
         </AppShell.Navbar>

@@ -12,6 +12,7 @@
 
 import { Route as rootRoute } from './routes/__root'
 import { Route as EffectRxImport } from './routes/effect-rx'
+import { Route as ConfigImport } from './routes/config'
 import { Route as AdminImport } from './routes/admin'
 import { Route as AboutImport } from './routes/about'
 import { Route as IndexImport } from './routes/index'
@@ -22,6 +23,12 @@ import { Route as ProjectsIdImport } from './routes/projects/$id'
 const EffectRxRoute = EffectRxImport.update({
   id: '/effect-rx',
   path: '/effect-rx',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const ConfigRoute = ConfigImport.update({
+  id: '/config',
+  path: '/config',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -74,6 +81,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminImport
       parentRoute: typeof rootRoute
     }
+    '/config': {
+      id: '/config'
+      path: '/config'
+      fullPath: '/config'
+      preLoaderRoute: typeof ConfigImport
+      parentRoute: typeof rootRoute
+    }
     '/effect-rx': {
       id: '/effect-rx'
       path: '/effect-rx'
@@ -97,6 +111,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/admin': typeof AdminRoute
+  '/config': typeof ConfigRoute
   '/effect-rx': typeof EffectRxRoute
   '/projects/$id': typeof ProjectsIdRoute
 }
@@ -105,6 +120,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/admin': typeof AdminRoute
+  '/config': typeof ConfigRoute
   '/effect-rx': typeof EffectRxRoute
   '/projects/$id': typeof ProjectsIdRoute
 }
@@ -114,16 +130,30 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/admin': typeof AdminRoute
+  '/config': typeof ConfigRoute
   '/effect-rx': typeof EffectRxRoute
   '/projects/$id': typeof ProjectsIdRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/about' | '/admin' | '/effect-rx' | '/projects/$id'
+  fullPaths:
+    | '/'
+    | '/about'
+    | '/admin'
+    | '/config'
+    | '/effect-rx'
+    | '/projects/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/about' | '/admin' | '/effect-rx' | '/projects/$id'
-  id: '__root__' | '/' | '/about' | '/admin' | '/effect-rx' | '/projects/$id'
+  to: '/' | '/about' | '/admin' | '/config' | '/effect-rx' | '/projects/$id'
+  id:
+    | '__root__'
+    | '/'
+    | '/about'
+    | '/admin'
+    | '/config'
+    | '/effect-rx'
+    | '/projects/$id'
   fileRoutesById: FileRoutesById
 }
 
@@ -131,6 +161,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
   AdminRoute: typeof AdminRoute
+  ConfigRoute: typeof ConfigRoute
   EffectRxRoute: typeof EffectRxRoute
   ProjectsIdRoute: typeof ProjectsIdRoute
 }
@@ -139,6 +170,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
   AdminRoute: AdminRoute,
+  ConfigRoute: ConfigRoute,
   EffectRxRoute: EffectRxRoute,
   ProjectsIdRoute: ProjectsIdRoute,
 }
@@ -156,6 +188,7 @@ export const routeTree = rootRoute
         "/",
         "/about",
         "/admin",
+        "/config",
         "/effect-rx",
         "/projects/$id"
       ]
@@ -168,6 +201,9 @@ export const routeTree = rootRoute
     },
     "/admin": {
       "filePath": "admin.tsx"
+    },
+    "/config": {
+      "filePath": "config.tsx"
     },
     "/effect-rx": {
       "filePath": "effect-rx.tsx"

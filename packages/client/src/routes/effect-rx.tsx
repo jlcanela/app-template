@@ -68,6 +68,8 @@ const resultWithContextRx = Rx.make(
   }),
 );
 
+const transientRx = Rx.make(0);
+
 function CounterDemo() {
   const [show, setShow] = useState(true);
   return (
@@ -78,6 +80,7 @@ function CounterDemo() {
           <Counter />
           <br />
           <CounterButton />
+          <CounterTransientButton />
         </>
       ) : (
         <>
@@ -95,6 +98,7 @@ function Counter() {
   const count4 = useRxValue(resultRx).pipe(Result.getOrElse(() => 0));
   const count5 = useRxValue(resultWithContextRx).pipe(Result.getOrElse(() => 0));
   const st = useRxValue(resultRxFinal).pipe(Result.getOrThrow);
+  const transient = useRxValue(transientRx);
 
   return (
     <>
@@ -102,6 +106,7 @@ function Counter() {
         {count}-{count2}-{count3}-{count4}-{count5}
       </h1>
       <p>{st}</p>
+      <p>Transient: {transient}</p>
     </>
   );
 }
@@ -109,6 +114,11 @@ function Counter() {
 function CounterButton() {
   const setCount = useRxSet(countRx);
   return <button onClick={() => setCount((count) => count + 1)}>Increment</button>;
+}
+
+function CounterTransientButton() {
+  const setCount = useRxSet(transientRx);
+  return <button onClick={() => setCount((count) => count + 1)}>Increment Transient</button>;
 }
 
 // User demo
@@ -392,31 +402,3 @@ export function FlagToggleDemo() {
     </div>
   );
 }
-
-// Rx.runtime.addGlobalLayer(
-//   Layer.setConfigProvider(ConfigProvider.fromJson(import.meta.env)),
-// )
-
-// const allConfig = Effect.gen(function* () {
-//    console.log(import.meta.env) // check what keys exist
-//   // Retrieve the current config provider
-//   const configProvider = yield* ConfigProvider.ConfigProvider // ✅ get from environment
-//   const config = yield* configProvider.load(Config.all({
-//   Env: Config.string("VITE_ENV"),
-//   ApiUrl: Config.string("VITE_API_URL"),
-//   })).pipe(Effect.mapError((e) => new Error(`Failed to load config: ${e.message}`)));
-//   return config;
-// })
-
-// const allConfigRx =  Rx.make(allConfig)
-
-// function DisplayConfig() {
-//   const cfg = useRx(allConfigRx)//.pipe(Result.getOrThrow);
-
-//   return (
-//     <section>
-//       <h2>App Config2 (Loaded from ConfigProvider)</h2>
-//       <pre>{JSON.stringify(cfg, null, 2)}</pre>
-//     </section>
-//   )
-// }
