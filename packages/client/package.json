@@ -19,7 +19,7 @@
     "test": "vitest"
   },
   "dependencies": {
-    "@effect-rx/rx-react": "*",
+    "@effect-rx/rx-react": "0.36.1",
     "@effect/platform": "*",
     "@effect/platform-browser": "*",
     "@effect/rpc": "*",

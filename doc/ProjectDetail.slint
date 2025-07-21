@@ -1,0 +1,131 @@
+import { Button, TextEdit, CheckBox } from "std-widgets.slint";
+
+export component ProjectDetail {
+    width: 660px;
+    height: 900px;
+
+    VerticalLayout {
+        spacing: 16px;
+
+        // En-tête du projet
+        Rectangle {
+            width: parent.width;
+            height: 80px;
+            border-radius: 8px;
+            border-width: 1px;
+            border-color: #BBB;
+
+            HorizontalLayout {
+                spacing: 12px;
+                Text { text: "Nom du projet"; font-size: 24px; }
+                Text { text: "Statut : En cours"; color: #32bf84; }
+            }
+            Text { text: "Description succincte du projet"; font-size: 16px; }
+            HorizontalLayout {
+                spacing: 32px;
+                Text { text: "Début :"; } Text { text: "11/06/2025"; }
+                Text { text: "Échéance :"; } Text { text: "12/09/2025"; }
+            }
+        }
+
+        // Objectifs et Parties prenantes
+        Rectangle {
+            width: parent.width;
+            border-width: 1px;
+            border-color: #EEE;
+
+            HorizontalLayout {
+                spacing: 80px;
+                VerticalLayout {
+                    Text { text: "Objectifs"; font-weight: bold; }
+                    Text { text: "— Livrer MVP" }
+                    Text { text: "— Qualité A+" }
+                }
+                VerticalLayout {
+                    Text { text: "Parties Prenantes"; font-weight: bold; }
+                    Text { text: "Alice (Chef de projet)" }
+                    Text { text: "Bob (Lead Dev)" }
+                }
+            }
+        }
+
+        // Planning des Jalons
+        Rectangle {
+            width: parent.width;
+            border-width: 1px; border-color: #EEE;
+            VerticalLayout {
+                Text { text: "Jalons & Planning"; font-weight: bold; font-size: 18px; }
+                // Tableau simplifié wireframe :
+                HorizontalLayout {
+                    spacing: 16px;
+                    Text { text: "Cahier des charges"; }
+                    Text { text: "Maquette"; }
+                    Text { text: "12/07/2025"; }
+                    Text { text: "Terminé"; }
+                }
+                HorizontalLayout {
+                    spacing: 16px;
+                    Text { text: "Prototype"; }
+                    Text { text: "Démo interne"; }
+                    Text { text: "20/07/2025"; }
+                    Text { text: "En cours"; }
+                }
+            }
+        }
+
+        // Tâches & suivi
+        Rectangle {
+            width: parent.width;
+            border-width: 1px; border-color: #EEE;
+            VerticalLayout {
+                Text { text: "Tâches à réaliser"; font-weight: bold; }
+
+                HorizontalLayout {
+                    spacing: 20px;
+                    CheckBox { text: "Créer la base de données"; }
+                    Text { text: "Responsable : Bob"; }
+                    Text { text: "Échéance : 15/07/2025"; }
+                }
+
+                HorizontalLayout {
+                    spacing: 20px;
+                    CheckBox { text: "Intégration frontend"; }
+                    Text { text: "Responsable : Alice"; }
+                    Text { text: "Échéance : 18/07/2025"; }
+                }
+            }
+        }
+
+        // Section contrôle, risques, et ressources
+        Rectangle {
+            width: parent.width;
+            border-width: 1px; border-color: #EEE;
+
+            HorizontalLayout {
+                spacing: 60px;
+                VerticalLayout {
+                    Text { text: "Contrôles Qualité"; font-weight: bold; }
+                    Text { text: "Tests unitaires, revue code" }
+                }
+                VerticalLayout {
+                    Text { text: "Risques"; font-weight: bold; }
+                    Text { text: "Retard livraison data" }
+                }
+                VerticalLayout {
+                    Text { text: "Ressources"; font-weight: bold; }
+                    Text { text: "Budget, serveurs, licences" }
+                }
+            }
+        }
+
+        // Section discussion/documents
+        Rectangle {
+            width: parent.width;
+            border-width: 1px; border-color: #EEE;
+            VerticalLayout {
+                Text { text: "Communication & Docs"; font-weight: bold; }
+                TextEdit { placeholder-text: "Nouveau commentaire…" }
+            }
+        }
+    }
+}

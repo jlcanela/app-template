@@ -11,12 +11,19 @@
 // Import Routes
 
 import { Route as rootRoute } from './routes/__root'
+import { Route as EffectRxImport } from './routes/effect-rx'
 import { Route as AdminImport } from './routes/admin'
 import { Route as AboutImport } from './routes/about'
 import { Route as IndexImport } from './routes/index'
 import { Route as ProjectsIdImport } from './routes/projects/$id'
 
 // Create/Update Routes
+
+const EffectRxRoute = EffectRxImport.update({
+  id: '/effect-rx',
+  path: '/effect-rx',
+  getParentRoute: () => rootRoute,
+} as any)
 
 const AdminRoute = AdminImport.update({
   id: '/admin',
@@ -67,6 +74,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminImport
       parentRoute: typeof rootRoute
     }
+    '/effect-rx': {
+      id: '/effect-rx'
+      path: '/effect-rx'
+      fullPath: '/effect-rx'
+      preLoaderRoute: typeof EffectRxImport
+      parentRoute: typeof rootRoute
+    }
     '/projects/$id': {
       id: '/projects/$id'
       path: '/projects/$id'
@@ -83,6 +97,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/admin': typeof AdminRoute
+  '/effect-rx': typeof EffectRxRoute
   '/projects/$id': typeof ProjectsIdRoute
 }
 
@@ -90,6 +105,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/admin': typeof AdminRoute
+  '/effect-rx': typeof EffectRxRoute
   '/projects/$id': typeof ProjectsIdRoute
 }
 
@@ -98,15 +114,16 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/admin': typeof AdminRoute
+  '/effect-rx': typeof EffectRxRoute
   '/projects/$id': typeof ProjectsIdRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/about' | '/admin' | '/projects/$id'
+  fullPaths: '/' | '/about' | '/admin' | '/effect-rx' | '/projects/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/about' | '/admin' | '/projects/$id'
-  id: '__root__' | '/' | '/about' | '/admin' | '/projects/$id'
+  to: '/' | '/about' | '/admin' | '/effect-rx' | '/projects/$id'
+  id: '__root__' | '/' | '/about' | '/admin' | '/effect-rx' | '/projects/$id'
   fileRoutesById: FileRoutesById
 }
 
@@ -114,6 +131,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
   AdminRoute: typeof AdminRoute
+  EffectRxRoute: typeof EffectRxRoute
   ProjectsIdRoute: typeof ProjectsIdRoute
 }
 
@@ -121,6 +139,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
   AdminRoute: AdminRoute,
+  EffectRxRoute: EffectRxRoute,
   ProjectsIdRoute: ProjectsIdRoute,
 }
 
@@ -137,6 +156,7 @@ export const routeTree = rootRoute
         "/",
         "/about",
         "/admin",
+        "/effect-rx",
         "/projects/$id"
       ]
     },
@@ -148,6 +168,9 @@ export const routeTree = rootRoute
     },
     "/admin": {
       "filePath": "admin.tsx"
+    },
+    "/effect-rx": {
+      "filePath": "effect-rx.tsx"
     },
     "/projects/$id": {
       "filePath": "projects/$id.tsx"
