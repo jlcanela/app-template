@@ -33,6 +33,7 @@ export const AdminRpcLive = HttpApiBuilder.group(DomainApi, "admin", (handlers) 
           }
         }),
       )
-      .handle("migrate-data", () => repo.migrate().pipe(Effect.orDie));
+      .handle("migrate-data", () => repo.migrate().pipe(Effect.orDie))
+      .handle("validate-data", () => repo.migrate().pipe(Effect.orDie));
   }),
 ).pipe(Layer.provide(Cosmos.Default));

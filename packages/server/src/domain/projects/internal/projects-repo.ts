@@ -57,6 +57,24 @@ export class ProjectsRepo extends Effect.Service<ProjectsRepo>()("ProjectsRepo",
 
           yield* Effect.log("Data Migrated");
         }),
+      validate: () =>
+        Effect.gen(function* () {
+          let continuationToken: string | undefined = undefined;
+          const searchParams: SearchParamsType = {
+            type: "Project",
+            columnFilterFns: { version: "lower" },
+            columnFilters: [{ id: "version", value: "2" }],
+            sorting: [],
+            pagination: { pageIndex: 0, pageSize: 30 },
+          };
+
+          do {
+            const result: any = yield* cosmos.search({ ...searchParams, continuationToken });
+            continuationToken = result.continuationToken;
+          } while (continuationToken);
+
+          yield* Effect.log("Data Migrated");
+        }),
     };
   }),
 }) {}

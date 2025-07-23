@@ -1,5 +1,6 @@
 import { GenerateFakeProjects } from "@/components/GenerateFakeProjects";
 import { MigrateToLatestVersion } from "@/components/MigrateData";
+import { ValidateData } from "@/components/ValidateData";
 import { Stack, Title } from "@mantine/core";
 import { createFileRoute } from "@tanstack/react-router";
 
@@ -14,6 +15,7 @@ function AdminPage() {
         <Title order={1}>Administration Page</Title>
         <GenerateFakeProjects />
         <MigrateToLatestVersion />
+        <ValidateData />
       </Stack>
     </>
   );

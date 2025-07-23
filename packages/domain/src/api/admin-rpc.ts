@@ -19,4 +19,5 @@ export class AdminGroup extends HttpApiGroup.make("admin")
       .setPayload(GenSample),
   )
   .add(HttpApiEndpoint.post("migrate-data", "/migrate-data").addSuccess(Schema.Void))
+  .add(HttpApiEndpoint.post("validate-data", "/validate-data").addSuccess(Schema.Void))
   .prefix("/api/admin") {}
