@@ -25,6 +25,7 @@ export const ProjectStatus_V1_to_V2 = Schema.transformOrFail(ProjectStatus_V1, P
 
 export const projectV2Fields = Schema.Struct({
   ...projectV1Fields.fields,
+  version: Schema.Literal(2),
   status: ProjectStatus_V2,
 });
 
@@ -38,10 +39,10 @@ export const Project_V1_to_V2 = Schema.transformOrFail(projectV1Fields, projectV
       const status = yield* Schema.decode(ProjectStatus_V1_to_V2)(input.status).pipe(
         Effect.mapError((error) => new Forbidden(ast, input.status, error.message)),
       );
-      return { ...input, status } as ProjectType_V2;
+      return { ...input, status, version: 2 } as ProjectType_V2;
     }),
 
-  encode: (input, options, ast, from) => Effect.succeed(input as ProjectType_V1),
+  encode: (input, options, ast, from) => Effect.succeed({ ...input, version: 1 } as ProjectType_V1),
 });
 
 export type ProjectType_V2 = Schema.Schema.Type<typeof Project_V2>;

@@ -20,6 +20,8 @@ export const ProjectStatus_V1 = Schema.Union(
 export type ProjectStatus_V1 = Schema.Schema.Type<typeof ProjectStatus_V1>;
 
 export const projectV1Fields = Schema.Struct({
+  _tag: Schema.Literal("Project"),
+  version: Schema.Literal(1),
   id: ProjectId_V1.annotations({
     title: "Project ID",
     arbitrary: g((faker) => ProjectId_V1.make(faker.string.uuid())),

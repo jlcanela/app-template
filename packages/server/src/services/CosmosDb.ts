@@ -1,7 +1,8 @@
 import { CosmosClient, type ItemDefinition, JSONValue, PartitionKeyKind } from "@azure/cosmos";
+import { Project_V1_to_V2, Project_V2 } from "@org/domain/api/projects/v2";
 import { SearchParams } from "@org/domain/api/search-rpc";
 import "dotenv/config";
-import { Console, Data, Effect, pipe, Schedule } from "effect";
+import { Console, Data, Effect, pipe, Schedule, Schema } from "effect";
 import { Agent } from "node:https";
 import { timed } from "./timed.js";
 
@@ -199,11 +200,28 @@ export class Cosmos extends Effect.Service<Cosmos>()("app/CosmosDb", {
           }
           yield* Effect.log(JSON.stringify(page, null, 2));
           return {
-            items: (page.resources as Array<T>) ?? <T>[],
+            items: migrateArrOnRead(page.resources), // as Array<T>) ?? <T>[],
             continuationToken: page.continuationToken,
             totalCount: totalRowCount, // optional
           };
         }).pipe(Effect.withSpan("queryProjects"));
+      }
+
+      type MigrationKey = "Project_V1" | "Project_V2";
+
+      const transforms: Record<MigrationKey, (u: unknown) => any> = {
+        Project_V1: Schema.decodeUnknownSync(Project_V1_to_V2),
+        Project_V2: Schema.decodeUnknownSync(Project_V2),
+      };
+
+      function migrateOnRead<T>(item: { _tag: string; version: number }): T {
+        const key = `${item._tag}_V${item.version}` as MigrationKey;
+        const decode = transforms[key];
+        return decode(item) as T;
+      }
+
+      function migrateArrOnRead<T>(items: any[]) {
+        return items.map(migrateOnRead);
       }
 
       function query() {

@@ -4,6 +4,7 @@ import {
   Group,
   Loader,
   Notification,
+  Select,
   Slider,
   Stack,
   Text,
@@ -18,20 +19,22 @@ import { Effect } from "effect";
 
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import ErrorIcon from "@mui/icons-material/Error";
+import { DBVersionType, dbVersionValues, GenSampleType } from "@org/domain/api/admin-rpc";
 
-const genSample = (size: number) =>
+const genSample = (param: GenSampleType) =>
   Effect.gen(function* () {
     const client = yield* HttpApiClient.make(DomainApi, {
       baseUrl: window.location.origin,
     });
-    return yield* client.admin["generate-sample"]({ payload: { size } });
+    return yield* client.admin["generate-sample"]({ payload: param });
   }).pipe(Effect.provide(FetchHttpClient.layer));
 
+//  TData = unknown, TError = DefaultError, TVariables = void, TContext = unknown
 const useGenerateSample = () =>
-  useMutation<number, Error, number>({
-    mutationFn: async (size: number) => {
+  useMutation({
+    mutationFn: async (param: GenSampleType) => {
       try {
-        return await Effect.runPromise(genSample(size));
+        return await Effect.runPromise(genSample(param));
       } catch (error) {
         // Normalize error to a standard error
         throw new Error(error instanceof Error ? error.message : "Unknown error");
@@ -40,6 +43,7 @@ const useGenerateSample = () =>
   });
 
 export function GenerateFakeProjects() {
+  const [dbVersion, setDbVersion] = useState<DBVersionType>("V1");
   const [size, setSize] = useState(10);
   const [notification, setNotification] = useState<{
     message: string;
@@ -51,22 +55,25 @@ export function GenerateFakeProjects() {
   const { mutate, status } = useGenerateSample();
 
   const handleGenerate = () => {
-    mutate(size, {
-      onSuccess: (data: number) => {
-        setNotification({
-          message: `Successfully generated ${data} fake project(s)!`,
-          color: "green",
-          icon: <CheckCircleIcon fontSize="large" />,
-        });
+    mutate(
+      { size, dbVersion },
+      {
+        onSuccess: (data: number) => {
+          setNotification({
+            message: `Successfully generated ${data} fake project(s)!`,
+            color: "green",
+            icon: <CheckCircleIcon fontSize="large" />,
+          });
+        },
+        onError: (error: any) => {
+          setNotification({
+            message: error?.message || "An error occurred while generating fake projects.",
+            color: "red",
+            icon: <ErrorIcon fontSize="large" color="error" />,
+          });
+        },
       },
-      onError: (error: any) => {
-        setNotification({
-          message: error?.message || "An error occurred while generating fake projects.",
-          color: "red",
-          icon: <ErrorIcon fontSize="large" color="error" />,
-        });
-      },
-    });
+    );
   };
 
   return (
@@ -74,8 +81,15 @@ export function GenerateFakeProjects() {
       <Title order={1}>Administration Page</Title>
       <Card shadow="sm" padding="lg" radius="md" withBorder>
         <Title order={3} mb="md">
-          Generate Fake Projects
+          Generate Fake Projects V1
         </Title>
+        <Select
+          label="Database Version"
+          value={dbVersion}
+          onChange={(value) => value && setDbVersion(value as DBVersionType)}
+          data={dbVersionValues.map((v) => ({ value: v, label: v }))}
+          mb="md"
+        />
         <Text mb="xs">Use the slider to select how many fake projects to generate (0–100).</Text>
         <Group align="flex-end">
           <Slider
