@@ -70,12 +70,7 @@ function ProjectDetailsPage() {
     >
       <Group justify="space-between" align="center" mb="md">
         <Title order={3}>{project.name}</Title>
-        <Badge
-          variant="light"
-          color={
-            project.status === "Active" ? "green" : project.status === "Archived" ? "gray" : "blue"
-          }
-        >
+        <Badge variant="light" color={project.status === "Active" ? "green" : "blue"}>
           {project.status}
         </Badge>
       </Group>

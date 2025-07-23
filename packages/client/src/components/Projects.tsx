@@ -34,7 +34,7 @@ const projectColumns: MRT_ColumnDef<ProjectType>[] = [
 ];
 const Projects = () => (
   <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
-    <GenericInfiniteTable<ProjectType> columns={projectColumns} entityType="project" />
+    <GenericInfiniteTable<ProjectType> columns={projectColumns} entityType="Project" />
   </div>
 );
 

@@ -145,6 +145,14 @@ export class Cosmos extends Effect.Service<Cosmos>()("app/CosmosDb", {
               };
             });
 
+          filters.push({
+            clause: "c._tag = @paramtype",
+            param: {
+              name: `@paramtype`,
+              value: searchParams.type,
+            },
+          });
+
           const whereClause =
             filters.length > 0 ? "WHERE " + filters.map((f) => f.clause).join(" AND ") : "";
 
@@ -193,14 +201,16 @@ export class Cosmos extends Effect.Service<Cosmos>()("app/CosmosDb", {
 
           if (!page?.resources || page.resources.length === 0) {
             return {
-              items: [],
+              items: Array<T>(),
               continuationToken: undefined,
               totalCount: totalRowCount, // optional
             };
           }
           yield* Effect.log(JSON.stringify(page, null, 2));
           return {
-            items: migrateArrOnRead(page.resources), // as Array<T>) ?? <T>[],
+            items: migrateArrOnRead(
+              page.resources as Array<{ _tag: string; version: number }>,
+            ) as T[],
             continuationToken: page.continuationToken,
             totalCount: totalRowCount, // optional
           };
@@ -209,7 +219,7 @@ export class Cosmos extends Effect.Service<Cosmos>()("app/CosmosDb", {
 
       type MigrationKey = "Project_V1" | "Project_V2";
 
-      const transforms: Record<MigrationKey, (u: unknown) => any> = {
+      const transforms: Record<MigrationKey, (u: unknown) => unknown> = {
         Project_V1: Schema.decodeUnknownSync(Project_V1_to_V2),
         Project_V2: Schema.decodeUnknownSync(Project_V2),
       };
@@ -220,8 +230,8 @@ export class Cosmos extends Effect.Service<Cosmos>()("app/CosmosDb", {
         return decode(item) as T;
       }
 
-      function migrateArrOnRead<T>(items: any[]) {
-        return items.map(migrateOnRead);
+      function migrateArrOnRead<K extends { _tag: string; version: number }, T>(items: K[]): T[] {
+        return items.map(migrateOnRead) as unknown[] as T[];
       }
 
       function query() {

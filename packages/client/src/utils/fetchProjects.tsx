@@ -24,7 +24,7 @@ export function search<T>(searchParams: typeof SearchParams.Type) {
 
 export const findProject = async (id: ProjectId) => {
   const params: SearchParamsType = {
-    type: "project",
+    type: "Project",
     columnFilterFns: {
       name: "contains",
       description: "contains",

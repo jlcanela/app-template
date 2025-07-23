@@ -1,6 +1,7 @@
 import { HttpApiEndpoint, HttpApiGroup, HttpApiSchema } from "@effect/platform";
 import { Schema } from "effect";
 import { Project, ProjectId, UpsertProjectPayload } from "./projects/index.js";
+import { Project_V1, UpsertProjectPayload_V1 } from "./projects/v1.js";
 export * from "./projects/index.js";
 
 export class ProjectNotFoundError extends Schema.TaggedError<ProjectNotFoundError>(
@@ -22,6 +23,26 @@ export const projectIdParam = HttpApiSchema.param(
   Schema.String.pipe(Schema.brand("ProjectId")),
 );
 
+export class ProjectsGroupV1 extends HttpApiGroup.make("projects_v1")
+  .add(HttpApiEndpoint.get("list", "/").addSuccess(Schema.Array(Project_V1)))
+  .add(
+    HttpApiEndpoint.put("upsert", "/")
+      .addSuccess(Project)
+      .setPayload(UpsertProjectPayload_V1)
+      .addError(ProjectNotFoundError),
+  )
+  .add(
+    HttpApiEndpoint.del("delete", "/")
+      .setPayload(
+        Schema.Struct({
+          id: ProjectId,
+        }),
+      )
+      .addSuccess(Schema.Void)
+      .addError(ProjectNotFoundError),
+  )
+  .prefix("/api/v1/projects") {}
+
 export class ProjectsGroup extends HttpApiGroup.make("projects")
   .add(HttpApiEndpoint.get("list", "/").addSuccess(Schema.Array(Project)))
   .add(
@@ -40,4 +61,4 @@ export class ProjectsGroup extends HttpApiGroup.make("projects")
       .addSuccess(Schema.Void)
       .addError(ProjectNotFoundError),
   )
-  .prefix("/api/projects") {}
+  .prefix("/api/v2/projects") {}

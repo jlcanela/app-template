@@ -15,6 +15,8 @@ export const ProjectsRpcLive = HttpApiBuilder.group(DomainApi, "projects", (hand
           const payload = req.payload;
           if (payload.id !== undefined) {
             return yield* service.update({
+              _tag: "Project",
+              version: 2,
               id: payload.id,
               name: payload.name,
               description: payload.description,
@@ -24,6 +26,8 @@ export const ProjectsRpcLive = HttpApiBuilder.group(DomainApi, "projects", (hand
             });
           }
           return yield* service.create({
+            _tag: "Project",
+            version: 2,
             name: payload.name,
             description: payload.description,
             goal: payload.goal,

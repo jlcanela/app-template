@@ -34,7 +34,7 @@ function RouteComponent() {
   console.log("value:", value);
   return (
     <>
-      <div>Hello "/config"!</div>
+      <h1>Configuration</h1>
       <pre>{JSON.stringify(value, null, 2)}</pre>
     </>
   );
