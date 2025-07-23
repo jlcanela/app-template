@@ -1,6 +1,6 @@
 import { CosmosClient, type ItemDefinition, JSONValue, PartitionKeyKind } from "@azure/cosmos";
 import { Project_V1_to_V2, Project_V2 } from "@org/domain/api/projects/v2";
-import { SearchParams } from "@org/domain/api/search-rpc";
+import { SearchParamsType } from "@org/domain/api/search-rpc";
 import "dotenv/config";
 import { Console, Data, Effect, pipe, Schedule, Schema } from "effect";
 import { Agent } from "node:https";
@@ -116,7 +116,7 @@ export class Cosmos extends Effect.Service<Cosmos>()("app/CosmosDb", {
         Effect.tapError((e) => Console.log(e)),
       );
 
-      function search<T>(searchParams: typeof SearchParams.Type) {
+      function search<T>(searchParams: SearchParamsType) {
         return Effect.gen(function* () {
           const filters = searchParams.columnFilters
             .filter((f) => typeof f.value === "string" && f.value.length > 0)
@@ -132,6 +132,8 @@ export class Cosmos extends Effect.Service<Cosmos>()("app/CosmosDb", {
                 clause = `STARTSWITH(c.${f.id}, @param${idx})`;
               } else if (filterFn === "endsWith") {
                 clause = `ENDSWITH(c.${f.id}, @param${idx})`;
+              } else if (filterFn === "lower") {
+                clause = `c.${f.id} < StringToNumber(@param${idx})`;
               } else {
                 throw new Error(`Unknown filterFn: ${filterFn}`);
               }
@@ -206,7 +208,7 @@ export class Cosmos extends Effect.Service<Cosmos>()("app/CosmosDb", {
               totalCount: totalRowCount, // optional
             };
           }
-          yield* Effect.log(JSON.stringify(page, null, 2));
+          yield* Effect.logDebug(JSON.stringify(page, null, 2));
           return {
             items: migrateArrOnRead(
               page.resources as Array<{ _tag: string; version: number }>,

@@ -1,6 +1,6 @@
 import { Cosmos } from "@/services/CosmosDb.js";
 import { Project, ProjectId, ProjectNotFoundError } from "@org/domain/api/projects-rpc";
-import { SearchParams } from "@org/domain/api/search-rpc";
+import { SearchParams, SearchParamsType } from "@org/domain/api/search-rpc";
 import { Effect, Schema } from "effect";
 
 const CreateProjectInput = Project.pipe(Schema.omit("id"));
@@ -37,6 +37,26 @@ export class ProjectsRepo extends Effect.Service<ProjectsRepo>()("ProjectsRepo",
         Effect.gen(function* () {
           return Effect.succeed({ ...request, id: ProjectId.make("oops") });
         }),
-    } as const;
+      migrate: () =>
+        Effect.gen(function* () {
+          let continuationToken: string | undefined = undefined;
+          const searchParams: SearchParamsType = {
+            type: "Project",
+            columnFilterFns: { version: "lower" },
+            columnFilters: [{ id: "version", value: "2" }],
+            sorting: [],
+            pagination: { pageIndex: 0, pageSize: 30 },
+          };
+
+          do {
+            const result: any = yield* cosmos.search({ ...searchParams, continuationToken });
+            yield* cosmos.bulkUpsertDocuments(result.items as Project[]);
+
+            continuationToken = result.continuationToken;
+          } while (continuationToken);
+
+          yield* Effect.log("Data Migrated");
+        }),
+    };
   }),
 }) {}

@@ -13,5 +13,10 @@ export const GenSample = Schema.Struct({
 export type GenSampleType = typeof GenSample.Type;
 
 export class AdminGroup extends HttpApiGroup.make("admin")
-  .add(HttpApiEndpoint.post("generate-sample", "/").addSuccess(Schema.Number).setPayload(GenSample))
+  .add(
+    HttpApiEndpoint.post("generate-sample", "/generate-sample")
+      .addSuccess(Schema.Number)
+      .setPayload(GenSample),
+  )
+  .add(HttpApiEndpoint.post("migrate-data", "/migrate-data").addSuccess(Schema.Void))
   .prefix("/api/admin") {}

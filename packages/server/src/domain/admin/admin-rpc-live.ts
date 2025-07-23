@@ -4,10 +4,12 @@ import { Project_V1 } from "@org/domain/api/projects/v1";
 import { Project_V2 } from "@org/domain/api/projects/v2";
 import { DomainApi } from "@org/domain/domain-api";
 import { Arbitrary, Effect, FastCheck, Layer, Schema } from "effect";
+import { ProjectsRepo } from "../projects/internal/projects-repo.js";
 
 export const AdminRpcLive = HttpApiBuilder.group(DomainApi, "admin", (handlers) =>
   Effect.gen(function* () {
     const cosmos = yield* Cosmos;
+    const repo = yield* ProjectsRepo;
 
     function gen<T extends Schema.Schema<any, any, { id: string }>>(t: T, size: number) {
       return Effect.gen(function* () {
@@ -20,15 +22,17 @@ export const AdminRpcLive = HttpApiBuilder.group(DomainApi, "admin", (handlers) 
       });
     }
 
-    return handlers.handle("generate-sample", ({ payload }) =>
-      Effect.gen(function* () {
-        switch (payload.dbVersion) {
-          case "V1":
-            return yield* gen(Project_V1, payload.size);
-          case "V2":
-            return yield* gen(Project_V2, payload.size);
-        }
-      }),
-    );
+    return handlers
+      .handle("generate-sample", ({ payload }) =>
+        Effect.gen(function* () {
+          switch (payload.dbVersion) {
+            case "V1":
+              return yield* gen(Project_V1, payload.size);
+            case "V2":
+              return yield* gen(Project_V2, payload.size);
+          }
+        }),
+      )
+      .handle("migrate-data", () => repo.migrate().pipe(Effect.orDie));
   }),
 ).pipe(Layer.provide(Cosmos.Default));

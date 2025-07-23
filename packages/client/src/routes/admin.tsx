@@ -1,4 +1,6 @@
 import { GenerateFakeProjects } from "@/components/GenerateFakeProjects";
+import { MigrateToLatestVersion } from "@/components/MigrateData";
+import { Stack, Title } from "@mantine/core";
 import { createFileRoute } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/admin")({
@@ -6,5 +8,13 @@ export const Route = createFileRoute("/admin")({
 });
 
 function AdminPage() {
-  return <GenerateFakeProjects />;
+  return (
+    <>
+      <Stack mx="auto" my="xl" maw={600}>
+        <Title order={1}>Administration Page</Title>
+        <GenerateFakeProjects />
+        <MigrateToLatestVersion />
+      </Stack>
+    </>
+  );
 }

@@ -6,7 +6,6 @@ import {
   Notification,
   Select,
   Slider,
-  Stack,
   Text,
   Title,
 } from "@mantine/core";
@@ -77,58 +76,55 @@ export function GenerateFakeProjects() {
   };
 
   return (
-    <Stack mx="auto" my="xl" maw={600}>
-      <Title order={1}>Administration Page</Title>
-      <Card shadow="sm" padding="lg" radius="md" withBorder>
-        <Title order={3} mb="md">
-          Generate Fake Projects V1
-        </Title>
-        <Select
-          label="Database Version"
-          value={dbVersion}
-          onChange={(value) => value && setDbVersion(value as DBVersionType)}
-          data={dbVersionValues.map((v) => ({ value: v, label: v }))}
-          mb="md"
+    <Card shadow="sm" padding="lg" radius="md" withBorder>
+      <Title order={3} mb="md">
+        Generate Fake Projects V1
+      </Title>
+      <Select
+        label="Database Version"
+        value={dbVersion}
+        onChange={(value) => value && setDbVersion(value as DBVersionType)}
+        data={dbVersionValues.map((v) => ({ value: v, label: v }))}
+        mb="md"
+      />
+      <Text mb="xs">Use the slider to select how many fake projects to generate (0–100).</Text>
+      <Group align="flex-end">
+        <Slider
+          min={0}
+          max={10000}
+          value={size}
+          onChange={setSize}
+          marks={[
+            { value: 0, label: "0" },
+            { value: 1000, label: "1000" },
+            { value: 5000, label: "5000" },
+            { value: 10000, label: "10000" },
+          ]}
+          style={{ flex: 1, marginBottom: 20 }}
         />
-        <Text mb="xs">Use the slider to select how many fake projects to generate (0–100).</Text>
-        <Group align="flex-end">
-          <Slider
-            min={0}
-            max={10000}
-            value={size}
-            onChange={setSize}
-            marks={[
-              { value: 0, label: "0" },
-              { value: 1000, label: "1000" },
-              { value: 5000, label: "5000" },
-              { value: 10000, label: "10000" },
-            ]}
-            style={{ flex: 1, marginBottom: 20 }}
-          />
-          <Text size="lg" fw={700} style={{ width: 40, textAlign: "center" }}>
-            {size}
-          </Text>
-        </Group>
-        <Button
+        <Text size="lg" fw={700} style={{ width: 40, textAlign: "center" }}>
+          {size}
+        </Text>
+      </Group>
+      <Button
+        mt="md"
+        onClick={handleGenerate}
+        disabled={status === "pending" || size === 0}
+        leftSection={status === "pending" ? <Loader size={16} /> : undefined}
+      >
+        {status === "pending" ? "Generating..." : "Generate"}
+      </Button>
+      {notification && (
+        <Notification
+          color={notification.color}
+          icon={notification.icon}
           mt="md"
-          onClick={handleGenerate}
-          disabled={status === "pending" || size === 0}
-          leftSection={status === "pending" ? <Loader size={16} /> : undefined}
+          onClose={() => setNotification(null)}
+          withCloseButton
         >
-          {status === "pending" ? "Generating..." : "Generate"}
-        </Button>
-        {notification && (
-          <Notification
-            color={notification.color}
-            icon={notification.icon}
-            mt="md"
-            onClose={() => setNotification(null)}
-            withCloseButton
-          >
-            {notification.message}
-          </Notification>
-        )}
-      </Card>
-    </Stack>
+          {notification.message}
+        </Notification>
+      )}
+    </Card>
   );
 }
