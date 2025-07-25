@@ -13,7 +13,9 @@ import { ProjectsService } from "./domain/projects/internal/projects-service.js"
 import { ProjectsRpcLive } from "./domain/projects/projects-rpc-live.js";
 import { SearchRepo } from "./domain/search/internal/search-repo.js";
 import { SearchRpcLive } from "./domain/search/search-rpc-live.js";
+import { SseLive } from "./domain/sse/sse-rpc-live.js";
 import { StylesRpcLive } from "./domain/styles/styles-rpc-live.js";
+import { UserAuthMiddlewareLive } from "./middleware/auth-middleware-live.js";
 import { Cosmos } from "./services/CosmosDb.js";
 
 const ApiLive = HttpLayerRouter.addHttpApi(DomainApi, {
@@ -62,6 +64,9 @@ const AllRoutes = Layer.mergeAll(ApiLive, HealthRouter, SwaggerRouter).pipe(
   Layer.provide(ProjectsService.Default),
   Layer.provide(SearchRpcLive),
   Layer.provide(SearchRepo.Default),
+  Layer.provide(SseLive),
+  Layer.provide(UserAuthMiddlewareLive),
+  //Layer.provide(Current)
   Layer.provide(Cosmos.Default),
 );
 
