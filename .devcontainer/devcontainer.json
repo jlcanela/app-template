@@ -1,0 +1,13 @@
+{
+  "name": "Nix + DotNet Dev Container",
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+  "settings": {},
+  "extensions": [
+    "ms-dotnettools.csharp",
+    "arrterian.nix-env-selector"
+  ],
+  "features": [],
+  "postCreateCommand": "nix --version && dotnet --version"
+}
