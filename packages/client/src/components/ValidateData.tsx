@@ -3,7 +3,7 @@ import { Button, Card, Loader, Notification, Textarea, Title } from "@mantine/co
 import { DomainApi } from "@org/domain/domain-api";
 import { useMutation } from "@tanstack/react-query";
 import { Effect } from "effect";
-import { useState } from "react";
+import React from "react";
 
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import ErrorIcon from "@mui/icons-material/Error";
@@ -21,7 +21,8 @@ const useValidate = () =>
   useMutation({
     mutationFn: async () => {
       try {
-        return await Effect.runPromise(validateEffect);
+        await Effect.runPromise(validateEffect);
+        return;
       } catch (error) {
         throw new Error(error instanceof Error ? error.message : "Unknown error");
       }
@@ -29,9 +30,9 @@ const useValidate = () =>
   });
 
 // React Component
-export function ValidateData() {
-  const [logs, setLogs] = useState("");
-  const [notification, setNotification] = useState<{
+export const ValidateData = () => {
+  const [logs, setLogs] = React.useState("");
+  const [notification, setNotification] = React.useState<{
     message: string;
     color: "green" | "red";
     icon: React.ReactNode;
@@ -52,7 +53,7 @@ export function ValidateData() {
       },
       onError: (error: any) => {
         setNotification({
-          message: error?.message || "Validation failed.",
+          message: error?.message ?? "Validation failed.",
           color: "red",
           icon: <ErrorIcon fontSize="large" />,
         });
@@ -85,12 +86,14 @@ export function ValidateData() {
         readOnly
       />
 
-      {notification && (
+      {notification !== null && (
         <Notification
           color={notification.color}
           icon={notification.icon}
           mt="md"
-          onClose={() => setNotification(null)}
+          onClose={() => {
+            setNotification(null);
+          }}
           withCloseButton
         >
           {notification.message}
@@ -98,4 +101,4 @@ export function ValidateData() {
       )}
     </Card>
   );
-}
+};

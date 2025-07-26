@@ -3,12 +3,12 @@ import { useDisclosure } from "@mantine/hooks";
 import { Link, useRouterState } from "@tanstack/react-router";
 import React from "react";
 
-export function Layout({ children }: React.PropsWithChildren) {
+export const Layout = ({ children }: React.PropsWithChildren) => {
   const [opened, { toggle }] = useDisclosure();
   const { location } = useRouterState();
   const isProjectManagement = location.pathname === "/";
   const isAbout = location.pathname === "/about";
-  const isPath = (path: string) => location.pathname == path;
+  const isPath = (path: string) => location.pathname === path;
 
   return (
     <div style={{ height: "100vh", display: "flex", flexDirection: "column" }}>
@@ -85,4 +85,4 @@ export function Layout({ children }: React.PropsWithChildren) {
       </AppShell>
     </div>
   );
-}
+};

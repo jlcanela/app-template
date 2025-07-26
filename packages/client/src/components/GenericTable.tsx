@@ -1,4 +1,4 @@
-import { EntityTypes } from "@org/domain/api/search-rpc";
+import { type EntityTypes } from "@org/domain/api/search-rpc";
 import {
   MantineReactTable,
   useMantineReactTable,
@@ -9,7 +9,7 @@ import {
   type MRT_RowData,
   type MRT_SortingState,
 } from "mantine-react-table";
-import { useState } from "react";
+import React from "react";
 import { useSearch } from "../hooks/useSearch"; // adjust path!
 
 type GenericTableProps<T extends MRT_RowData> = {
@@ -18,13 +18,13 @@ type GenericTableProps<T extends MRT_RowData> = {
 };
 
 export function GenericTable<T extends MRT_RowData>({ columns, entityType }: GenericTableProps<T>) {
-  const [columnFilters, setColumnFilters] = useState<MRT_ColumnFiltersState>([]);
-  const [columnFilterFns, setColumnFilterFns] = useState<MRT_ColumnFilterFnsState>(
+  const [columnFilters, setColumnFilters] = React.useState<MRT_ColumnFiltersState>([]);
+  const [columnFilterFns, setColumnFilterFns] = React.useState<MRT_ColumnFilterFnsState>(
     Object.fromEntries(columns.map(({ accessorKey }) => [accessorKey as string, "contains"])),
   );
-  const [globalFilter, setGlobalFilter] = useState("");
-  const [sorting, setSorting] = useState<MRT_SortingState>([]);
-  const [pagination, setPagination] = useState<MRT_PaginationState>({
+  const [globalFilter, setGlobalFilter] = React.useState("");
+  const [sorting, setSorting] = React.useState<MRT_SortingState>([]);
+  const [pagination, setPagination] = React.useState<MRT_PaginationState>({
     pageIndex: 0,
     pageSize: 10,
   });
@@ -76,7 +76,7 @@ export function GenericTable<T extends MRT_RowData>({ columns, entityType }: Gen
       globalFilter,
       isLoading,
       pagination,
-      showAlertBanner: !!isError,
+      showAlertBanner: Boolean(isError),
       showProgressBars: isFetching,
       sorting,
     },

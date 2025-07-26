@@ -12,38 +12,38 @@ import {
   TextInput,
   Title,
 } from "@mantine/core";
-import { useEffect, useState } from "react";
+import React from "react";
 
 import type { SearchableFieldInfo } from "@/hooks/swagger-hooks";
 
-export function DynamicFilterPanel({
+export const DynamicFilterPanel = ({
   fields,
   onApply,
 }: {
-  fields: SearchableFieldInfo[];
+  fields: Array<SearchableFieldInfo>;
   onApply: (filterState: { [field: string]: any }) => void;
-}) {
-  const [open, setOpen] = useState(false);
+}) => {
+  const [open, setOpen] = React.useState(false);
   // For string fields: array of values; for enum: array of selected enums
-  const [filterState, setFilterState] = useState<{ [field: string]: string[] }>({});
-  const [selectedField, setSelectedField] = useState<string | null>(null);
-  const [inputValue, setInputValue] = useState<string>("");
+  const [filterState, setFilterState] = React.useState<{ [field: string]: Array<string> }>({});
+  const [selectedField, setSelectedField] = React.useState<string | null>(null);
+  const [inputValue, setInputValue] = React.useState<string>("");
 
   // Partition fields
-  const stringFields = fields.filter((f) => f.type === "string" && !f.enum);
-  const enumFields = fields.filter((f) => !!f.enum);
+  const stringFields = fields.filter((f) => f.type === "string" && Boolean(f.enum));
+  const enumFields = fields.filter((f) => Boolean(f.enum));
 
   // Call onApply whenever filterState changes
-  useEffect(() => {
+  React.useEffect(() => {
     onApply(filterState);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filterState]);
 
   // Add a filter value for string fields
   const handleAddStringFilter = () => {
-    if (!selectedField) return;
-    const prev = filterState[selectedField] || [];
-    if (inputValue && !prev.includes(inputValue)) {
+    if (selectedField === null) return;
+    const prev = filterState[selectedField] ?? [];
+    if (!prev.includes(inputValue)) {
       setFilterState((prevState) => ({
         ...prevState,
         [selectedField]: [...prev, inputValue],
@@ -55,7 +55,7 @@ export function DynamicFilterPanel({
   // Remove a single value for a string field
   const handleRemoveStringValue = (field: string, value: string) => {
     setFilterState((prev) => {
-      const arr = prev[field] || [];
+      const arr = prev[field] ?? [];
       const next = arr.filter((v: string) => v !== value);
       if (next.length === 0) {
         const { [field]: _, ...rest } = prev;
@@ -66,7 +66,7 @@ export function DynamicFilterPanel({
   };
 
   // Update enum field values
-  const handleEnumChange = (field: string, values: string[]) => {
+  const handleEnumChange = (field: string, values: Array<string>) => {
     setFilterState((prev) => ({
       ...prev,
       [field]: values,
@@ -78,7 +78,7 @@ export function DynamicFilterPanel({
   };
 
   return (
-    <>
+    <React.Fragment>
       <Group mb="md">
         <Button
           leftSection={
@@ -123,19 +123,21 @@ export function DynamicFilterPanel({
                 style={{ minWidth: 180 }}
               />
               <TextInput
-                label={selectedField ? `Filter by ${selectedField}` : "Filter value"}
+                label={selectedField === null ? "Filter value" : `Filter by ${selectedField}`}
                 value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
+                onChange={(e) => {
+                  setInputValue(e.target.value);
+                }}
                 onKeyDown={(e) => {
                   if (e.key === "Enter") handleAddStringFilter();
                 }}
-                disabled={!selectedField}
+                disabled={selectedField === null}
                 style={{ minWidth: 200 }}
               />
               <Button
                 disabled={
-                  !selectedField ||
-                  !inputValue ||
+                  selectedField === null ||
+                  inputValue.length === 0 ||
                   (filterState[selectedField]?.includes(inputValue) ?? false)
                 }
                 onClick={handleAddStringFilter}
@@ -146,11 +148,13 @@ export function DynamicFilterPanel({
             {/* Chips for string fields */}
             <Group>
               {stringFields.flatMap((field) =>
-                (filterState[field.name] || []).map((val) => (
+                (filterState[field.name] ?? []).map((val) => (
                   <Chip
                     key={field.name + val}
                     checked
-                    onChange={() => handleRemoveStringValue(field.name, val)}
+                    onChange={() => {
+                      handleRemoveStringValue(field.name, val);
+                    }}
                     color="blue"
                     variant="filled"
                   >
@@ -172,8 +176,10 @@ export function DynamicFilterPanel({
                       value: v,
                       label: v,
                     }))}
-                    value={filterState[field.name] || []}
-                    onChange={(values) => handleEnumChange(field.name, values)}
+                    value={filterState[field.name] ?? []}
+                    onChange={(values) => {
+                      handleEnumChange(field.name, values);
+                    }}
                     placeholder={`Select ${field.name}`}
                     clearable
                     searchable
@@ -185,9 +191,9 @@ export function DynamicFilterPanel({
           </Stack>
         </Paper>
       </Collapse>
-    </>
+    </React.Fragment>
   );
-}
+};
 
 function capitalize(str: string) {
   return str.charAt(0).toUpperCase() + str.slice(1);

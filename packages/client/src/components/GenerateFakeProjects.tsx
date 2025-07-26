@@ -10,7 +10,7 @@ import {
   Title,
 } from "@mantine/core";
 import { DomainApi } from "@org/domain/domain-api";
-import { useState } from "react";
+import React from "react";
 
 import { FetchHttpClient, HttpApiClient } from "@effect/platform";
 import { useMutation } from "@tanstack/react-query";
@@ -18,7 +18,7 @@ import { Effect } from "effect";
 
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import ErrorIcon from "@mui/icons-material/Error";
-import { DBVersionType, dbVersionValues, GenSampleType } from "@org/domain/api/admin-rpc";
+import { type DBVersionType, dbVersionValues, type GenSampleType } from "@org/domain/api/admin-rpc";
 
 const genSample = (param: GenSampleType) =>
   Effect.gen(function* () {
@@ -41,10 +41,10 @@ const useGenerateSample = () =>
     },
   });
 
-export function GenerateFakeProjects() {
-  const [dbVersion, setDbVersion] = useState<DBVersionType>("V1");
-  const [size, setSize] = useState(10);
-  const [notification, setNotification] = useState<{
+export const GenerateFakeProjects = () => {
+  const [dbVersion, setDbVersion] = React.useState<DBVersionType>("V1");
+  const [size, setSize] = React.useState(10);
+  const [notification, setNotification] = React.useState<{
     message: string;
     color: "green" | "red";
     icon: React.ReactNode;
@@ -83,7 +83,11 @@ export function GenerateFakeProjects() {
       <Select
         label="Database Version"
         value={dbVersion}
-        onChange={(value) => value && setDbVersion(value as DBVersionType)}
+        onChange={(value) => {
+          if (value !== null) {
+            setDbVersion(value as DBVersionType);
+          }
+        }}
         data={dbVersionValues.map((v) => ({ value: v, label: v }))}
         mb="md"
       />
@@ -114,12 +118,14 @@ export function GenerateFakeProjects() {
       >
         {status === "pending" ? "Generating..." : "Generate"}
       </Button>
-      {notification && (
+      {notification !== null && (
         <Notification
           color={notification.color}
           icon={notification.icon}
           mt="md"
-          onClose={() => setNotification(null)}
+          onClose={() => {
+            setNotification(null);
+          }}
           withCloseButton
         >
           {notification.message}
@@ -127,4 +133,4 @@ export function GenerateFakeProjects() {
       )}
     </Card>
   );
-}
+};

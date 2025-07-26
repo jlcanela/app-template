@@ -1,4 +1,4 @@
-import { EntityTypes } from "@org/domain/api/search-rpc";
+import { type EntityTypes } from "@org/domain/api/search-rpc";
 import {
   MantineReactTable,
   useMantineReactTable,
@@ -10,34 +10,34 @@ import {
   type MRT_RowVirtualizer,
   type MRT_SortingState,
 } from "mantine-react-table";
-import { useCallback, useEffect, useMemo, useRef, useState, type UIEvent } from "react";
+import React from "react";
 import { useInfiniteSearch } from "../hooks/useSearch"; // adjust path!
 
 type GenericTableProps<T extends MRT_RowData> = {
-  columns: MRT_ColumnDef<T>[];
+  columns: Array<MRT_ColumnDef<T>>;
   entityType: EntityTypes;
 };
 
-export function GenericInfiniteTable<T extends MRT_RowData>({
+export const GenericInfiniteTable = <T extends MRT_RowData>({
   columns,
   entityType,
-}: GenericTableProps<T>) {
-  const tableContainerRef = useRef<HTMLDivElement>(null); //we can get access to the underlying TableContainer element and react to its scroll events
+}: GenericTableProps<T>) => {
+  const tableContainerRef = React.useRef<HTMLDivElement>(null); //we can get access to the underlying TableContainer element and react to its scroll events
   const rowVirtualizerInstanceRef =
-    useRef<MRT_RowVirtualizer<HTMLDivElement, HTMLTableRowElement>>(null); //we can get access to the underlying Virtualizer instance and call its scrollToIndex method
+    React.useRef<MRT_RowVirtualizer<HTMLDivElement, HTMLTableRowElement>>(null); //we can get access to the underlying Virtualizer instance and call its scrollToIndex method
 
-  const [columnFilters, setColumnFilters] = useState<MRT_ColumnFiltersState>([]);
-  const [columnFilterFns, setColumnFilterFns] = useState<MRT_ColumnFilterFnsState>(
+  const [columnFilters, setColumnFilters] = React.useState<MRT_ColumnFiltersState>([]);
+  const [columnFilterFns, setColumnFilterFns] = React.useState<MRT_ColumnFilterFnsState>(
     Object.fromEntries(columns.map(({ accessorKey }) => [accessorKey as string, "contains"])),
   );
-  const [globalFilter, setGlobalFilter] = useState("");
-  const [sorting, setSorting] = useState<MRT_SortingState>([]);
-  const [pagination, setPagination] = useState<MRT_PaginationState>({
+  const [globalFilter, setGlobalFilter] = React.useState("");
+  const [sorting, setSorting] = React.useState<MRT_SortingState>([]);
+  const [pagination, setPagination] = React.useState<MRT_PaginationState>({
     pageIndex: 0,
     pageSize: 30,
   });
 
-  const stableParams = useMemo(
+  const stableParams = React.useMemo(
     () => ({
       columnFilterFns,
       columnFilters,
@@ -53,25 +53,21 @@ export function GenericInfiniteTable<T extends MRT_RowData>({
     stableParams,
   );
 
-  const items = useMemo(() => data?.pages.flatMap((page) => page.items) ?? [], [data]);
+  const items = React.useMemo(() => data?.pages.flatMap((page) => page.items) ?? [], [data]);
 
-  const totalDBRowCount = data?.pages?.[0]?.totalCount ?? 0;
-  console.log("Total DB Row Count:", totalDBRowCount);
+  const totalDBRowCount = data?.pages[0]?.totalCount ?? 0;
   const totalFetched = items.length;
 
-  const fetchMoreOnBottomReached = useCallback(
+  const fetchMoreOnBottomReached = React.useCallback(
     (containerRefElement?: HTMLDivElement | null) => {
-      console.log("Checking if more data should be fetched...");
       if (containerRefElement) {
-        const { scrollHeight, scrollTop, clientHeight } = containerRefElement;
-        console.log("scrollok:", scrollHeight - scrollTop - clientHeight < 400);
+        const { clientHeight, scrollHeight, scrollTop } = containerRefElement;
         //once the user has scrolled within 400px of the bottom of the table, fetch more data if we can
         if (
           scrollHeight - scrollTop - clientHeight < 400 &&
           !isFetching &&
           totalFetched < totalDBRowCount
         ) {
-          console.log("Fetching more data...");
           fetchNextPage();
         }
       }
@@ -80,11 +76,12 @@ export function GenericInfiniteTable<T extends MRT_RowData>({
   );
 
   //scroll to top of table when sorting or filters change
-  useEffect(() => {
+  React.useEffect(() => {
     if (rowVirtualizerInstanceRef.current) {
       try {
         rowVirtualizerInstanceRef.current.scrollToIndex(0);
       } catch (e) {
+        // eslint-disable-next-line no-console
         console.error(e);
       }
     }
@@ -126,8 +123,10 @@ export function GenericInfiniteTable<T extends MRT_RowData>({
       ref: tableContainerRef, //get access to the table container element
       //sx: { maxHeight: '600px' }, //give the table a max height
       onScroll: (
-        event: UIEvent<HTMLDivElement>, //add an event listener to the table container element
-      ) => fetchMoreOnBottomReached(event.target as HTMLDivElement),
+        event: React.UIEvent<HTMLDivElement>, //add an event listener to the table container element
+      ) => {
+        fetchMoreOnBottomReached(event.target as HTMLDivElement);
+      },
     },
     rowCount: totalDBRowCount,
     state: {
@@ -136,7 +135,7 @@ export function GenericInfiniteTable<T extends MRT_RowData>({
       globalFilter,
       isLoading,
       pagination,
-      showAlertBanner: !!isError,
+      showAlertBanner: Boolean(isError),
       showProgressBars: isFetching,
       sorting,
     },
@@ -145,4 +144,4 @@ export function GenericInfiniteTable<T extends MRT_RowData>({
   });
 
   return <MantineReactTable table={table} />;
-}
+};
