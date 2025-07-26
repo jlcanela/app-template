@@ -22,7 +22,7 @@ export const ProjectsRpcLive = HttpApiBuilder.group(DomainApi, "projects", (hand
               description: payload.description,
               goal: payload.goal,
               stakeholders: payload.stakeholders,
-              status: payload.status || "Draft",
+              status: payload.status,
             });
           }
           return yield* service.create({
@@ -32,7 +32,7 @@ export const ProjectsRpcLive = HttpApiBuilder.group(DomainApi, "projects", (hand
             description: payload.description,
             goal: payload.goal,
             stakeholders: payload.stakeholders,
-            status: payload.status || "Draft",
+            status: payload.status,
           });
         }),
       )

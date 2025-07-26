@@ -1,7 +1,7 @@
 import { ProjectsRepo } from "@/domain/projects/internal/projects-repo.js";
 import { Cosmos } from "@/services/CosmosDb.js";
-import { Project } from "@org/domain/api/projects-rpc";
-import { SearchParams } from "@org/domain/api/search-rpc";
+import { type Project } from "@org/domain/api/projects-rpc";
+import { type SearchParams } from "@org/domain/api/search-rpc";
 import { Effect } from "effect";
 
 export class SearchRepo extends Effect.Service<SearchRepo>()("SearchRepo", {

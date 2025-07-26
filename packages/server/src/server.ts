@@ -73,7 +73,7 @@ const AllRoutes = Layer.mergeAll(ApiLive, HealthRouter, SwaggerRouter).pipe(
 const portEnv = process.env.PORT;
 const port = Number.isInteger(Number(portEnv)) && Number(portEnv) > 0 ? Number(portEnv) : 3000;
 
-const oltp_grpc = process.env.OTEL_EXPORTER_OTLP_PROTOCOL === "grpc";
+const oltpGrpc = process.env.OTEL_EXPORTER_OTLP_PROTOCOL === "grpc";
 
 // export interface Configuration {
 //   readonly spanProcessor?: SpanProcessor | ReadonlyArray<SpanProcessor> | undefined
@@ -90,9 +90,9 @@ const oltp_grpc = process.env.OTEL_EXPORTER_OTLP_PROTOCOL === "grpc";
 // }
 
 const NodeSdkLive = NodeSdk.layer(() => ({
-  resource: { serviceName: process.env.OTEL_SERVICE_NAME || "Api" },
+  resource: { serviceName: process.env.OTEL_SERVICE_NAME ?? "Api" },
   spanProcessor: new BatchSpanProcessor(
-    oltp_grpc ? new OTLPTraceExporterGrpc() : new OTLPTraceExporterHttp(),
+    oltpGrpc ? new OTLPTraceExporterGrpc() : new OTLPTraceExporterHttp(),
   ),
   // logRecordProcessor: new BatchLogRecordProcessor(oltp_grpc ? new OTLPLogExporterGrpc() : new OTLPLogExporterHttp()),
 }));

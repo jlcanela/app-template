@@ -1,7 +1,7 @@
 //import { SseContract } from "@org/domain/api/Contracts";
 // import { type UserId } from "@org/domain/EntityIds";
 // import { CurrentUser } from "@org/domain/Policy";
-import { Events, UserId } from "@org/domain/api/sse-rpc";
+import { Events, type UserId } from "@org/domain/api/sse-rpc";
 import * as Array from "effect/Array";
 import * as Effect from "effect/Effect";
 import { pipe } from "effect/Function";
@@ -16,6 +16,7 @@ type ActiveConnection = {
   readonly queue: Queue.Queue<string>;
 };
 
+// eslint-disable-next-line no-use-before-define
 export class SseManager extends Effect.Service<SseManager>()("SseManager", {
   effect: Effect.gen(function* () {
     const connectionsRef = yield* Ref.make(MutableHashMap.empty<UserId, Array<ActiveConnection>>());

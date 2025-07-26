@@ -84,8 +84,10 @@ type UpdateStyleInput = typeof UpdateStyleInput.Type;
 //   }),
 // }) {}
 
+// eslint-disable-next-line no-use-before-define
 export class StylesRepo2 extends Effect.Service<StylesRepo2>()("StylesRepo2", {
   effect: Effect.gen(function* () {
+    yield* Effect.void;
     // const sql = yield* SqlClient.SqlClient;
 
     // const findAll = SqlSchema.findAll({
@@ -138,7 +140,7 @@ export class StylesRepo2 extends Effect.Service<StylesRepo2>()("StylesRepo2", {
 
     return {
       findAll: Effect.succeed(new Array<Style>()),
-      del: (id: StyleId) => Effect.succeed(true).pipe(Effect.asVoid),
+      del: (_id: StyleId) => Effect.succeed(true).pipe(Effect.asVoid),
       update: (request: UpdateStyleInput) =>
         Effect.fail(new StyleNotFoundError({ id: request.id })) as Effect.Effect<
           Style,

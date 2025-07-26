@@ -1,6 +1,6 @@
-import { CosmosClient, type ItemDefinition, JSONValue, PartitionKeyKind } from "@azure/cosmos";
-import { Project_V1_to_V2, Project_V2 } from "@org/domain/api/projects/v2";
-import { SearchParamsType } from "@org/domain/api/search-rpc";
+import { CosmosClient, type ItemDefinition, type JSONValue, PartitionKeyKind } from "@azure/cosmos";
+import { ProjectV1toV2, ProjectV2 } from "@org/domain/api/projects/v2";
+import type { SearchParamsType } from "@org/domain/api/search-rpc";
 import "dotenv/config";
 import { Console, Data, Effect, pipe, Schedule, Schema } from "effect";
 import { Agent } from "node:https";
@@ -14,32 +14,48 @@ export class DatabaseError extends Data.TaggedError("DatabaseError")<{
   }
 }
 
+export type SearchResult<T> = {
+  items: Array<T>;
+  continuationToken: string | undefined;
+  totalCount: number | undefined;
+};
+
 function connectionParam(name: string): Effect.Effect<{ endpoint: string; key: string }, string> {
   const connectionStringName = `ConnectionStrings__${name}`;
   const connectionString = process.env[connectionStringName];
   const cosmosEndpoint = process.env.COSMOS_ENDPOINT;
   const cosmosKey = process.env.COSMOS_KEY;
 
-  if (connectionString) {
-    const parts = connectionString.split(";").filter(Boolean);
-    const map: Record<string, string> = {};
-    for (const part of parts) {
-      const [key, ...rest] = part.split("=");
-      if (key) {
-        map[key] = rest.join("=");
-      }
+  // eslint-disable-next-line eqeqeq
+  if (connectionString == null) {
+    // eslint-disable-next-line eqeqeq
+    if (cosmosEndpoint == null || cosmosKey == null) {
+      return Effect.fail("INVALID_COSMOSDB_CONFIG");
     }
-    const endpoint = map["AccountEndpoint"];
-    const key = map["AccountKey"];
-    if (endpoint && key) {
-      return Effect.succeed({ endpoint, key });
-    }
-  } else if (cosmosEndpoint && cosmosKey) {
     return Effect.succeed({ endpoint: cosmosEndpoint, key: cosmosKey });
+  }
+
+  const parts = connectionString.split(";").filter(Boolean);
+  const map: Record<string, string> = {};
+  for (const part of parts) {
+    const [key, ...rest] = part.split("=");
+    if (key !== undefined) {
+      // covers both undefined and null
+      map[key] = rest.join("=");
+    }
+    if (key !== undefined) {
+      map[key] = rest.join("=");
+    }
+  }
+  const endpoint = map.AccountEndpoint;
+  const key = map.AccountKey;
+  if (endpoint !== undefined && key !== undefined) {
+    return Effect.succeed({ endpoint, key });
   }
   return Effect.fail("INVALID_COSMOSDB_CONFIG");
 }
 
+// eslint-disable-next-line no-use-before-define
 export class Cosmos extends Effect.Service<Cosmos>()("app/CosmosDb", {
   effect: timed(
     "Creating CosmosDb Service",
@@ -116,15 +132,36 @@ export class Cosmos extends Effect.Service<Cosmos>()("app/CosmosDb", {
         Effect.tapError((e) => Console.log(e)),
       );
 
-      function search<T>(searchParams: SearchParamsType) {
+      function search<T>(
+        searchParams: SearchParamsType,
+      ): Effect.Effect<SearchResult<T>, DatabaseError, never> {
+        type MigrationKey = "Project_V1" | "Project_V2";
+
+        const transforms: Record<MigrationKey, (u: unknown) => unknown> = {
+          Project_V1: Schema.decodeUnknownSync(ProjectV1toV2),
+          Project_V2: Schema.decodeUnknownSync(ProjectV2),
+        };
+
+        function migrateOnRead(item: { _tag: string; version: number }): T {
+          const expectedEntityType = `${item._tag}_V${item.version}` as MigrationKey;
+          const decode = transforms[expectedEntityType];
+          return decode(item) as T;
+        }
+
+        function migrateArrOnRead<K extends { _tag: string; version: number }>(
+          items: Array<K>,
+        ): Array<T> {
+          return items.map(migrateOnRead);
+        }
+
         return Effect.gen(function* () {
           const filters = searchParams.columnFilters
             .filter((f) => typeof f.value === "string" && f.value.length > 0)
             .map((f, idx) => {
-              const filterFn = searchParams.columnFilterFns[f.id] || "contains";
+              const filterFn = searchParams.columnFilterFns[f.id] ?? "contains";
 
               let clause = "";
-              let paramValue = f.value as JSONValue;
+              const paramValue = f.value as JSONValue;
 
               if (filterFn === "contains") {
                 clause = `CONTAINS(c.${f.id}, @param${idx})`;
@@ -165,10 +202,8 @@ export class Cosmos extends Effect.Service<Cosmos>()("app/CosmosDb", {
               ? "ORDER BY " + sorting.map((s) => `c.${s.id} ${s.desc ? "DESC" : "ASC"}`).join(", ")
               : "";
 
-          const query = `SELECT * FROM c ${whereClause} ${orderClause}`;
-
           const querySpec = {
-            query,
+            query: `SELECT * FROM c ${whereClause} ${orderClause}`,
             parameters: filters.map((f) => f.param),
           };
 
@@ -201,39 +236,20 @@ export class Cosmos extends Effect.Service<Cosmos>()("app/CosmosDb", {
             catch: (error) => new DatabaseError({ error }),
           }).pipe(Effect.withSpan("fetchNextPage"));
 
-          if (!page?.resources || page.resources.length === 0) {
+          if (page.resources.length === 0) {
             return {
               items: Array<T>(),
               continuationToken: undefined,
-              totalCount: totalRowCount, // optional
+              totalCount: totalRowCount as number | undefined, // optional
             };
           }
           yield* Effect.logDebug(JSON.stringify(page, null, 2));
           return {
-            items: migrateArrOnRead(
-              page.resources as Array<{ _tag: string; version: number }>,
-            ) as T[],
+            items: migrateArrOnRead(page.resources as Array<{ _tag: string; version: number }>),
             continuationToken: page.continuationToken,
-            totalCount: totalRowCount, // optional
+            totalCount: totalRowCount as number | undefined, // optional
           };
         }).pipe(Effect.withSpan("queryProjects"));
-      }
-
-      type MigrationKey = "Project_V1" | "Project_V2";
-
-      const transforms: Record<MigrationKey, (u: unknown) => unknown> = {
-        Project_V1: Schema.decodeUnknownSync(Project_V1_to_V2),
-        Project_V2: Schema.decodeUnknownSync(Project_V2),
-      };
-
-      function migrateOnRead<T>(item: { _tag: string; version: number }): T {
-        const key = `${item._tag}_V${item.version}` as MigrationKey;
-        const decode = transforms[key];
-        return decode(item) as T;
-      }
-
-      function migrateArrOnRead<K extends { _tag: string; version: number }, T>(items: K[]): T[] {
-        return items.map(migrateOnRead) as unknown[] as T[];
       }
 
       function query() {
@@ -246,7 +262,7 @@ export class Cosmos extends Effect.Service<Cosmos>()("app/CosmosDb", {
             try: () => projectContainer.items.query(querySpec).fetchAll(),
             catch: (error) => new DatabaseError({ error }),
           });
-          return response.resources;
+          return response.resources as Array<unknown>;
         }).pipe(Effect.withSpan("readAllDatabases"));
       }
 
@@ -291,10 +307,9 @@ export class Cosmos extends Effect.Service<Cosmos>()("app/CosmosDb", {
             return projectContainer.items.bulk(operations, { continueOnError: true });
           },
           catch: (error) => {
-            console.error("Bulk upsert failed:", error);
             return new DatabaseError({ error });
           },
-        }).pipe(Effect.withSpan("upsertChunk"));
+        }).pipe(Effect.tapError(Effect.log), Effect.withSpan("upsertChunk"));
       }
 
       function bulkUpsertDocuments<T extends { id: string }>(items: Array<T>, concurrency = 25) {

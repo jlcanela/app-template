@@ -15,7 +15,7 @@ export class ProjectsService extends Effect.Service<ProjectsService>()("ProjectS
 
     return {
       findAll: () => repo.findAll, // Effect.succeed(new Array<Project>()),
-      del: (id: ProjectId) => Effect.succeed(true).pipe(Effect.asVoid),
+      del: (_id: ProjectId) => Effect.succeed(true).pipe(Effect.asVoid),
       update: (request: UpdateProjectInput) =>
         Effect.fail(new ProjectNotFoundError({ id: request.id })) as Effect.Effect<
           Project,
