@@ -1,14 +1,14 @@
 import { search, searchQueryOption } from "@/utils/fetchProjects";
 import { keepPreviousData, useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import {
-  MRT_ColumnFilterFnsState,
-  MRT_ColumnFiltersState,
-  MRT_PaginationState,
-  MRT_SortingState,
+  type MRT_ColumnFilterFnsState,
+  type MRT_ColumnFiltersState,
+  type MRT_PaginationState,
+  type MRT_SortingState,
 } from "mantine-react-table";
 
-import { SearchApiResponse } from "@/utils/fetchProjects"; // Adjust the import path as necessary
-import { EntityTypes, SearchParamsType } from "@org/domain/api/search-rpc";
+import { type SearchApiResponse } from "@/utils/fetchProjects"; // Adjust the import path as necessary
+import { type EntityTypes, type SearchParamsType } from "@org/domain/api/search-rpc";
 import { Effect } from "effect";
 
 interface Params {
@@ -49,7 +49,7 @@ export function useInfiniteSearch<T>(type: EntityTypes, params: Params) {
         continuationToken: pageParam ?? undefined,
       };
 
-      return await search<T>(effectiveParams).pipe(Effect.runPromise);
+      return search<T>(effectiveParams).pipe(Effect.runPromise);
     },
     initialPageParam: null,
     getNextPageParam: (lastPage: SearchApiResponse<T>) => lastPage.continuationToken ?? undefined,

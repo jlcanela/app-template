@@ -1,16 +1,16 @@
-import { useEffect, useState } from "react";
+import React from "react";
 
 // Utility hook: fetches the Swagger spec from a URL
 export function useSwaggerSpec(url: string) {
-  const [swaggerSpec, setSwaggerSpec] = useState<any>(null);
-  const [error, setError] = useState<Error | null>(null);
+  const [swaggerSpec, setSwaggerSpec] = React.useState<any | undefined>(undefined);
+  const [error, setError] = React.useState<Error | null>(null);
 
-  useEffect(() => {
+  React.useEffect(() => {
     async function fetchSwagger() {
       try {
         const response = await fetch(url);
         if (!response.ok) throw new Error(`Failed to fetch: ${response.status}`);
-        const spec = await response.json();
+        const spec = (await response.json()) as object | undefined;
         setSwaggerSpec(spec);
       } catch (err) {
         setError(err as Error);
@@ -26,7 +26,7 @@ export function useSwaggerSpec(url: string) {
 export type SearchableFieldInfo = {
   name: string;
   type: string;
-  enum?: string[];
+  enum?: Array<string>;
   nullable?: boolean;
   [key: string]: any; // allow additional OpenAPI properties if needed
 };
@@ -35,16 +35,16 @@ export type SearchableFieldInfo = {
 export function useSearchableFields(
   url: string,
   typeName: string,
-): { fields: SearchableFieldInfo[]; loading: boolean; error: Error | null } {
-  const { swaggerSpec, error } = useSwaggerSpec(url);
-  const [fields, setFields] = useState<SearchableFieldInfo[]>([]);
+): { fields: Array<SearchableFieldInfo>; loading: boolean; error: Error | null } {
+  const { error, swaggerSpec } = useSwaggerSpec(url);
+  const [fields, setFields] = React.useState<Array<SearchableFieldInfo>>([]);
 
-  useEffect(() => {
-    if (!swaggerSpec) return;
+  React.useEffect(() => {
+    if (swaggerSpec === undefined) return;
 
     // Find the schema for the given type
     const schema = swaggerSpec?.components?.schemas?.[typeName];
-    if (!schema || !schema.properties) {
+    if (!schema?.properties) {
       setFields([]);
       return;
     }
