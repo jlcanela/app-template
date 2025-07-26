@@ -1,9 +1,11 @@
 import { HttpApiEndpoint, HttpApiGroup, HttpApiSchema } from "@effect/platform";
 import { Schema } from "effect";
 import { Project, ProjectId, UpsertProjectPayload } from "./projects/index.js";
-import { Project_V1, UpsertProjectPayload_V1 } from "./projects/v1.js";
+import { ProjectV1, UpsertProjectPayloadV1 } from "./projects/v1.js";
+
 export * from "./projects/index.js";
 
+// eslint-disable-next-line no-use-before-define
 export class ProjectNotFoundError extends Schema.TaggedError<ProjectNotFoundError>(
   "ProjectNotFoundError",
 )(
@@ -24,11 +26,11 @@ export const projectIdParam = HttpApiSchema.param(
 );
 
 export class ProjectsGroupV1 extends HttpApiGroup.make("projects_v1")
-  .add(HttpApiEndpoint.get("list", "/").addSuccess(Schema.Array(Project_V1)))
+  .add(HttpApiEndpoint.get("list", "/").addSuccess(Schema.Array(ProjectV1)))
   .add(
     HttpApiEndpoint.put("upsert", "/")
       .addSuccess(Project)
-      .setPayload(UpsertProjectPayload_V1)
+      .setPayload(UpsertProjectPayloadV1)
       .addError(ProjectNotFoundError),
   )
   .add(

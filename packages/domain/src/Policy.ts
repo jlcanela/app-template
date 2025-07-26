@@ -3,7 +3,7 @@ import { type NonEmptyReadonlyArray } from "effect/Array";
 import * as Context from "effect/Context";
 import * as Effect from "effect/Effect";
 //import * as Schema from "effect/Schema";
-import { UserId } from "./api/sse-rpc.js";
+import { type UserId } from "./api/sse-rpc.js";
 import * as CustomHttpApiError from "./CustomHttpApiError.js";
 //import { type UserId } from "./EntityIds.js";
 //import * as internal from "./internal/policy.js";

@@ -4,7 +4,7 @@ import { Schema } from "effect";
 // EffectTS (@effect/schema) translation for the entity search models
 
 import { Project } from "./projects-rpc.js";
-import { Project_V1 } from "./projects/v1.js";
+import { ProjectV1 } from "./projects/v1.js";
 
 const EntityTypes = Schema.Union(Schema.Literal("Project"));
 export type EntityTypes = Schema.Schema.Type<typeof EntityTypes>;
@@ -37,7 +37,7 @@ export const EntitySearchResponse = <T extends Schema.Schema<any, any>>(TEntity:
   });
 
 export const EntitySearchResponseProject = Schema.Union(
-  EntitySearchResponse(Schema.Union(Project_V1, Project)),
+  EntitySearchResponse(Schema.Union(ProjectV1, Project)),
   ErrorResponse,
 );
 export type EntitySearchResponseProject = Schema.Schema.Type<typeof EntitySearchResponseProject>;
