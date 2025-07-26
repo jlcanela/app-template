@@ -5,7 +5,7 @@ import * as path from "node:path";
 
 export const layerDotEnv = () =>
   fromDotEnv(path.join(process.cwd(), ".env")).pipe(
-    Effect.tap(console.log),
+    Effect.tap(Effect.log),
     Effect.map(Layer.setConfigProvider),
     Layer.unwrapEffect,
   );
@@ -33,7 +33,8 @@ class ServiceTwo extends Effect.Service<ServiceTwo>()("ServiceTwo", {
 const program = Layer.launch(
   Layer.effectDiscard(
     Effect.gen(function* () {
-      yield* ServiceOne, yield* ServiceTwo;
+      yield* ServiceOne;
+      yield* ServiceTwo;
     }),
   ).pipe(Layer.provide([ServiceOne.Default, ServiceTwo.Default])),
 );

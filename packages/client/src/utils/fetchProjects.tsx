@@ -1,6 +1,6 @@
 import { FetchHttpClient, HttpApiClient } from "@effect/platform";
-import { Project, ProjectId } from "@org/domain/api/projects-rpc";
-import { SearchParams, SearchParamsType } from "@org/domain/api/search-rpc";
+import { type Project, type ProjectId } from "@org/domain/api/projects-rpc";
+import { type SearchParams, type SearchParamsType } from "@org/domain/api/search-rpc";
 import { DomainApi } from "@org/domain/domain-api";
 import { queryOptions } from "@tanstack/react-query";
 import { Effect } from "effect";
@@ -37,9 +37,9 @@ export const findProject = async (id: ProjectId) => {
     sorting: [],
   };
 
-  const projects: Project[] = (await Effect.runPromise(search<Project>(params))).items;
+  const projects: Array<Project> = (await Effect.runPromise(search<Project>(params))).items;
 
-  if (!projects[0]) {
+  if (projects[0] === undefined) {
     throw new Error("Project not found");
   }
 
@@ -63,7 +63,7 @@ export function searchQueryOption<T>(searchParams: SearchParamsType) {
   }
   const body = {
     ...searchParams,
-    globalFilter: searchParams.globalFilter || "",
+    globalFilter: searchParams.globalFilter ?? "",
   };
 
   return {

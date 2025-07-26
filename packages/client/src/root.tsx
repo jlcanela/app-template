@@ -1,16 +1,16 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { createRouter, RouterProvider } from "@tanstack/react-router";
-import { StrictMode } from "react";
+import React from "react";
 import { createRoot } from "react-dom/client";
 import { routeTree } from "./routeTree.gen";
 
 // Import the generated route tree
 import { createTheme, MantineProvider } from "@mantine/core";
 
-const queryClient = new QueryClient();
-
 import "@mantine/core/styles.css";
+
+const queryClient = new QueryClient();
 
 // Create a new router instance
 //const router = createRouter({ routeTree });
@@ -33,12 +33,12 @@ const theme = createTheme({});
 
 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 createRoot(document.getElementById("root")!).render(
-  <StrictMode>
+  <React.StrictMode>
     <MantineProvider theme={theme}>
       <QueryClientProvider client={queryClient}>
         <RouterProvider router={router} context={{ queryClient }} />
         <ReactQueryDevtools initialIsOpen={false} />
       </QueryClientProvider>
     </MantineProvider>
-  </StrictMode>,
+  </React.StrictMode>,
 );

@@ -16,14 +16,7 @@ import { ProjectId } from "@org/domain/api/projects-rpc";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 
-export const Route = createFileRoute("/projects/$id")({
-  loader: ({ context: { queryClient }, params: { id } }) =>
-    queryClient.ensureQueryData(findProjectQueryOption(ProjectId.make(id))),
-  component: ProjectDetailsPage,
-  errorComponent: ProjectErrorPage,
-});
-
-export function ProjectErrorPage({ error }: { error: Error }) {
+export const ProjectErrorPage = ({ error }: { error: Error }) => {
   return (
     <Container size="sm" py="xl">
       <Card
@@ -53,11 +46,11 @@ export function ProjectErrorPage({ error }: { error: Error }) {
       </Card>
     </Container>
   );
-}
+};
 
-function ProjectDetailsPage() {
+const ProjectDetailsPage = () => {
   const { id } = Route.useParams();
-  const project = useSuspenseQuery(findProjectQueryOption(ProjectId.make(id))).data!;
+  const project = useSuspenseQuery(findProjectQueryOption(ProjectId.make(id))).data;
 
   return (
     <Card
@@ -94,4 +87,11 @@ function ProjectDetailsPage() {
       </Stack>
     </Card>
   );
-}
+};
+
+export const Route = createFileRoute("/projects/$id")({
+  loader: ({ context: { queryClient }, params: { id } }) =>
+    queryClient.ensureQueryData(findProjectQueryOption(ProjectId.make(id))),
+  component: ProjectDetailsPage,
+  errorComponent: ProjectErrorPage,
+});
